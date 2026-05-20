@@ -1,0 +1,4 @@
+{
+    "level": "partial",
+    "description": "Since OT/Pen only happens if the score is tied at the end of regular time, and at most 1 goal is added during OT/Pen, only Handicap lines between -1 and +1 are affected. For those, both double win and double loss scenarios are possible, depending on the exact line, the final score and the winner after OT/Pen."
+}
