@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+standalone/db.sqlite3
+node_modules/
+editor/node_modules/
+static/payout_rules/editor/
+.env
+.DS_Store

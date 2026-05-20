@@ -1,0 +1,33 @@
+name: Validate Data
+
+on:
+  pull_request:
+    paths:
+      - "data/**"
+
+jobs:
+  validate:
+    name: Schema & integrity check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Detect changed bookmaker assignment files
+        run: |
+          git diff --name-only origin/${{ github.base_ref }}...HEAD \
+            | grep -E '^data/sports/.+/bookmakers/.+\.json$' \
+            > /tmp/changed_bookmakers.txt || true
+          echo "Changed bookmaker files:"
+          cat /tmp/changed_bookmakers.txt || echo "(none)"
+
+      - name: Validate data files
+        run: |
+          python .github/scripts/validate_data.py \
+            --changed-bookmaker-files-from /tmp/changed_bookmakers.txt

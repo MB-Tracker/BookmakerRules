@@ -1,0 +1,10 @@
+{
+    "bet365": {
+        "display": "bet365",
+        "mb_tracker_ids": [7]
+    },
+    "winamax": {
+        "display": "Winamax",
+        "mb_tracker_ids": [8]
+    }
+}
