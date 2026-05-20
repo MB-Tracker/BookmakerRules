@@ -1,0 +1,4 @@
+{
+    "level": "partial",
+    "description": "OT Over + Reg Under -> works, double win possible\nOT Under + Reg Over -> double loss possible, if end of reg. time under wins, but with the 1 additional goal scored during OT / Pen, over suddenly wins."
+}
