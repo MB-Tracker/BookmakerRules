@@ -1,10 +1,102 @@
 {
+    "888sport": {
+        "display": "888sport",
+        "mb_tracker_ids": [20]
+    },
+    "admiralBet": {
+        "display": "AdmiralBet",
+        "mb_tracker_ids": [12]
+    },
+    "bet3000": {
+        "display": "Bet3000",
+        "mb_tracker_ids": [9]
+    },
     "bet365": {
         "display": "bet365",
         "mb_tracker_ids": [7]
     },
+    "betano": {
+        "display": "Betano",
+        "mb_tracker_ids": [14]
+    },
+    "bet-at-home": {
+        "display": "Bet-at-home",
+        "mb_tracker_ids": [22]
+    },
+    "betway": {
+        "display": "Betway",
+        "mb_tracker_ids": [36]
+    },
+    "bwin": {
+        "display": "Bwin",
+        "mb_tracker_ids": [19]
+    },
+    "daznbet": {
+        "display": "DAZN Bet",
+        "mb_tracker_ids": [18]
+    },
+    "intertops": {
+        "display": "Intertops",
+        "mb_tracker_ids": [13]
+    },
+    "interwetten": {
+        "display": "Interwetten",
+        "mb_tracker_ids": [10]
+    },
+    "leovegas": {
+        "display": "LeoVegas",
+        "mb_tracker_ids": [24]
+    },
+    "merkurbets": {
+        "display": "MerkurBets",
+        "mb_tracker_ids": [25]
+    },
+    "mollybet": {
+        "display": "MollyBet / Black",
+        "mb_tracker_ids": [29]
+    },
+    "neobet": {
+        "display": "Neo.Bet",
+        "mb_tracker_ids": [26]
+    },
+    "oddset": {
+        "display": "Oddset",
+        "mb_tracker_ids": [15]
+    },
+    "betfair": {
+        "display": "Betfair / OrbitX / SharpX",
+        "mb_tracker_ids": [11, 17]
+    },
+    "polymarket": {
+        "display": "Polymarket",
+        "mb_tracker_ids": [32]
+    },
+    "ps3838": {
+        "display": "PS3838",
+        "mb_tracker_ids": [30]
+    },
+    "sportwetten-de": {
+        "display": "Sportwetten.de",
+        "mb_tracker_ids": [16]
+    },
+    "tipico": {
+        "display": "Tipico",
+        "mb_tracker_ids": [21]
+    },
+    "tiptorro": {
+        "display": "Tiptorro",
+        "mb_tracker_ids": [31]
+    },
+    "tipwin": {
+        "display": "Tipwin",
+        "mb_tracker_ids": [35]
+    },
+    "vbet": {
+        "display": "Vbet",
+        "mb_tracker_ids": [23]
+    },
     "winamax": {
-        "display": "Winamax",
-        "mb_tracker_ids": [8]
+        "display": "Winamax (DE, FR)",
+        "mb_tracker_ids": [8, 34]
     }
 }
