@@ -1,0 +1,4 @@
+{
+    "level": "incompatible",
+    "description": "After the 1st set, if the player of $B retires, the bet looses, and $A is refunded, thus loosing all money wagered on $B"
+}

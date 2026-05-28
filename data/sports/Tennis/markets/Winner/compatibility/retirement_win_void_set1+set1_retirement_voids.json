@@ -1,0 +1,4 @@
+{
+    "level": "incompatible",
+    "description": "If player A retires, and B wins:\n- $B -> A, $A -> B : Bet A is refunded and bet B is won -> Extra win\n- $A -> A, $B -> B : Bet A looses and bet B is refunded, leaving you with the loss of Bet A"
+}

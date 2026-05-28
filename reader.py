@@ -120,10 +120,11 @@ def get_compatibility(sport, market):
 def find_compatibility(rule_a, rule_b, sport, market):
     """Return compatibility entry for this rule pair in this market, or None."""
     compat_dir = _market_dir(sport, market) / "compatibility"
-    path = compat_dir / f"{_pair_name(rule_a, rule_b)}.json"
+    pair = _pair_name(rule_a, rule_b)
+    path = compat_dir / f"{pair}.json"
     if not path.exists():
         return None
-    return {"rule_a": rule_a, "rule_b": rule_b, **_jload(path)}
+    return {"rule_a": rule_a, "rule_b": rule_b, **_jload(path), "slug": pair}
 
 
 # --- Validation ---

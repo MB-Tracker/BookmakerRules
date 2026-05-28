@@ -1,0 +1,4 @@
+{
+    "level": "compatible",
+    "description": "Worst case, all bets are void. Best case the player of $A retires, $A refunds, and $B settles your bet as won -> Full Profit at $B."
+}

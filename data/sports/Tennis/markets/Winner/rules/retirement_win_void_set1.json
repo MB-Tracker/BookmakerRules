@@ -1,0 +1,4 @@
+{
+    "label": "Retirement voids loosing bets, but winning bets still pay",
+    "description": "1st set retirement: All bets are VOID\nRetirement afterwards: if you would loose, your bet is VOID and the stake is refunded, if you would win, your bet is settled as WON."
+}
