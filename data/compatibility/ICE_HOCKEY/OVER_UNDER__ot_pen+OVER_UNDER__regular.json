@@ -5,7 +5,9 @@
         {
             "when": {
                 "a": {
-                    "outcomes": ["OVER"]
+                    "outcomes": [
+                        "OVER"
+                    ]
                 }
             },
             "level": "additional_profit",
@@ -14,7 +16,9 @@
         {
             "when": {
                 "a": {
-                    "outcomes": ["UNDER"]
+                    "outcomes": [
+                        "UNDER"
+                    ]
                 }
             },
             "level": "incompatible",
