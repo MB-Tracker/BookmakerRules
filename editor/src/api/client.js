@@ -12,15 +12,16 @@ async function req(method, path, body) {
 const enc = encodeURIComponent;
 
 export const api = {
-  // Sports
+  /** Sports, markets and bookmakers this repo is allowed to name. */
+  getVocab: () => req("GET", "/vocab"),
+
+  // Sports — created from a key in the vocabulary, never from free text.
   getSports: () => req("GET", "/sports"),
-  createSport: (name) => req("POST", "/sports", { name }),
-  renameSport: (sport, name) => req("PUT", `/sports/${enc(sport)}`, { name }),
+  createSport: (key) => req("POST", "/sports", { key }),
   deleteSport: (sport) => req("DELETE", `/sports/${enc(sport)}`),
 
-  // Markets
-  createMarket: (sport, name) => req("POST", `/sports/${enc(sport)}/markets`, { name }),
-  renameMarket: (sport, market, name) => req("PUT", `/sports/${enc(sport)}/markets/${enc(market)}`, { name }),
+  // Markets — same rule, and only markets the model offers in that sport.
+  createMarket: (sport, key) => req("POST", `/sports/${enc(sport)}/markets`, { key }),
   deleteMarket: (sport, market) => req("DELETE", `/sports/${enc(sport)}/markets/${enc(market)}`),
 
   // Rules — scoped to sport+market
@@ -36,16 +37,13 @@ export const api = {
   touchBookmakerCheck: (sport, market, bm) => req("PATCH", `/sports/${enc(sport)}/markets/${enc(market)}/bookmakers/${enc(bm)}/check`, {}),
   removeBookmaker: (sport, market, bm) => req("DELETE", `/sports/${enc(sport)}/markets/${enc(market)}/bookmakers/${enc(bm)}`),
 
-  // Compatibility — scoped to sport+market
-  getCompatibility: (sport, market) => req("GET", `/sports/${enc(sport)}/markets/${enc(market)}/compatibility`),
-  createCompatibility: (sport, market, data) => req("POST", `/sports/${enc(sport)}/markets/${enc(market)}/compatibility`, data),
-  updateCompatibility: (sport, market, pair, data) => req("PUT", `/sports/${enc(sport)}/markets/${enc(market)}/compatibility/${enc(pair)}`, data),
-  deleteCompatibility: (sport, market, pair) => req("DELETE", `/sports/${enc(sport)}/markets/${enc(market)}/compatibility/${enc(pair)}`),
+  // Compatibility — scoped to the sport rather than to one market, because a
+  // pair can span two (1X2 backed against Double Chance).
+  getCompatibility: (sport) => req("GET", `/sports/${enc(sport)}/compatibility`),
+  createCompatibility: (sport, data) => req("POST", `/sports/${enc(sport)}/compatibility`, data),
+  updateCompatibility: (sport, slug, data) => req("PUT", `/sports/${enc(sport)}/compatibility/${enc(slug)}`, data),
+  deleteCompatibility: (sport, slug) => req("DELETE", `/sports/${enc(sport)}/compatibility/${enc(slug)}`),
 
   // Validation
   validate: () => req("GET", "/validate"),
-
-  // Bridge mappings (read-only)
-  getBookmakerAliases: () => req("GET", "/bookmaker-aliases"),
-  getSportMapping: () => req("GET", "/sport-mapping"),
 };

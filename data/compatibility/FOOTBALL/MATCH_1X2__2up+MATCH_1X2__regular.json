@@ -1,0 +1,19 @@
+{
+    "level": "additional_profit",
+    "description": "",
+    "cases": [
+        {
+            "when": {
+                "a": {
+                    "outcomes": [
+                        "HOME",
+                        "AWAY"
+                    ],
+                    "side": "BACK"
+                }
+            },
+            "level": "additional_profit",
+            "description": "If the team of $A leads at any point, the bet is immediately paid out, no matter the end result."
+        }
+    ]
+}

@@ -1,0 +1,24 @@
+{
+    "level": "partial",
+    "description": "OT Over + Reg Under -> works, double win possible\nOT Under + Reg Over -> double loss possible, if end of reg. time under wins, but with the 1 additional goal scored during OT / Pen, over suddenly wins.",
+    "cases": [
+        {
+            "when": {
+                "a": {
+                    "outcomes": ["OVER"]
+                }
+            },
+            "level": "additional_profit",
+            "description": "$A settles Over on the score after overtime and the shootout, $B settles Under on regular time. The extra goal can only ever push the Over in, so the two legs can both win and can never both lose."
+        },
+        {
+            "when": {
+                "a": {
+                    "outcomes": ["UNDER"]
+                }
+            },
+            "level": "incompatible",
+            "description": "$A settles Under on the score after overtime and the shootout, $B settles Over on regular time. A game that is under the line at the end of regulation and then goes to overtime gains a goal: $B's Over has already lost on regular time, and the extra goal makes $A's Under lose too - both legs lose."
+        }
+    ]
+}

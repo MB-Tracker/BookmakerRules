@@ -1,0 +1,127 @@
+{
+    "MATCH_1X2": {
+        "label": "Match Result (1X2)",
+        "has_line": false,
+        "outcomes": ["HOME", "DRAW", "AWAY"],
+        "sports": ["FOOTBALL", "ICE_HOCKEY"]
+    },
+    "MONEYLINE": {
+        "label": "Match Winner (2-way)",
+        "has_line": false,
+        "outcomes": ["HOME", "AWAY"],
+        "sports": ["FOOTBALL", "BASKETBALL", "TENNIS", "ICE_HOCKEY", "AMERICAN_FOOTBALL", "DARTS"]
+    },
+    "DOUBLE_CHANCE": {
+        "label": "Double Chance",
+        "has_line": false,
+        "outcomes": ["HOME_DRAW", "HOME_AWAY", "DRAW_AWAY"],
+        "sports": ["FOOTBALL", "ICE_HOCKEY"]
+    },
+    "DRAW_NO_BET": {
+        "label": "Draw No Bet",
+        "has_line": false,
+        "outcomes": ["HOME", "AWAY"],
+        "sports": ["FOOTBALL", "ICE_HOCKEY"]
+    },
+    "OVER_UNDER": {
+        "label": "Total Goals/Points Over-Under",
+        "has_line": true,
+        "outcomes": ["OVER", "UNDER"],
+        "sports": ["FOOTBALL", "BASKETBALL", "TENNIS", "ICE_HOCKEY", "AMERICAN_FOOTBALL"]
+    },
+    "TEAM_OVER_UNDER_HOME": {
+        "label": "Home Team Total",
+        "has_line": true,
+        "outcomes": ["OVER", "UNDER"],
+        "sports": ["FOOTBALL", "BASKETBALL", "ICE_HOCKEY", "AMERICAN_FOOTBALL"]
+    },
+    "TEAM_OVER_UNDER_AWAY": {
+        "label": "Away Team Total",
+        "has_line": true,
+        "outcomes": ["OVER", "UNDER"],
+        "sports": ["FOOTBALL", "BASKETBALL", "ICE_HOCKEY", "AMERICAN_FOOTBALL"]
+    },
+    "ASIAN_HANDICAP": {
+        "label": "Asian Handicap",
+        "has_line": true,
+        "outcomes": ["HOME", "AWAY"],
+        "sports": ["FOOTBALL", "BASKETBALL", "TENNIS", "ICE_HOCKEY", "AMERICAN_FOOTBALL"]
+    },
+    "HANDICAP_3WAY": {
+        "label": "European Handicap (3-way)",
+        "has_line": true,
+        "outcomes": ["HOME", "DRAW", "AWAY"],
+        "sports": ["FOOTBALL", "ICE_HOCKEY"]
+    },
+    "BTTS": {
+        "label": "Both Teams To Score",
+        "has_line": false,
+        "outcomes": ["YES", "NO"],
+        "sports": ["FOOTBALL", "ICE_HOCKEY"]
+    },
+    "ODD_EVEN": {
+        "label": "Odd/Even Total",
+        "has_line": false,
+        "outcomes": ["ODD", "EVEN"],
+        "sports": ["FOOTBALL", "BASKETBALL", "TENNIS", "ICE_HOCKEY", "AMERICAN_FOOTBALL"]
+    },
+    "CORRECT_SCORE": {
+        "label": "Correct Score",
+        "has_line": false,
+        "outcomes": [
+            "SCORE_0_0", "SCORE_0_1", "SCORE_0_2", "SCORE_0_3",
+            "SCORE_1_0", "SCORE_1_1", "SCORE_1_2", "SCORE_1_3",
+            "SCORE_2_0", "SCORE_2_1", "SCORE_2_2", "SCORE_2_3",
+            "SCORE_3_0", "SCORE_3_1", "SCORE_3_2", "SCORE_3_3"
+        ],
+        "sports": ["FOOTBALL"]
+    },
+    "TOTAL_SETS": {
+        "label": "Total Sets",
+        "has_line": true,
+        "outcomes": ["OVER", "UNDER"],
+        "sports": ["TENNIS"]
+    },
+    "SET_HANDICAP": {
+        "label": "Set Handicap",
+        "has_line": true,
+        "outcomes": ["HOME", "AWAY"],
+        "sports": ["TENNIS"]
+    },
+    "TOTAL_LEGS": {
+        "label": "Total Legs",
+        "has_line": true,
+        "outcomes": ["OVER", "UNDER"],
+        "sports": ["DARTS"]
+    },
+    "LEG_HANDICAP": {
+        "label": "Leg Handicap",
+        "has_line": true,
+        "outcomes": ["HOME", "AWAY"],
+        "sports": ["DARTS"]
+    },
+    "TOTAL_180S": {
+        "label": "180s Total",
+        "has_line": true,
+        "outcomes": ["OVER", "UNDER"],
+        "sports": ["DARTS"]
+    },
+    "PLAYER_180S_HOME": {
+        "label": "Home Player 180s Total",
+        "has_line": true,
+        "outcomes": ["OVER", "UNDER"],
+        "sports": ["DARTS"]
+    },
+    "PLAYER_180S_AWAY": {
+        "label": "Away Player 180s Total",
+        "has_line": true,
+        "outcomes": ["OVER", "UNDER"],
+        "sports": ["DARTS"]
+    },
+    "MOST_180S": {
+        "label": "Most 180s",
+        "has_line": false,
+        "outcomes": ["HOME", "DRAW", "AWAY"],
+        "sports": ["DARTS"]
+    }
+}

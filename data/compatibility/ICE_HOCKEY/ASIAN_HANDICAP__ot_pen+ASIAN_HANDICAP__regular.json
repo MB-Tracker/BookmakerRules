@@ -1,0 +1,17 @@
+{
+    "level": "partial",
+    "description": "Since OT/Pen only happens if the score is tied at the end of regular time, and at most 1 goal is added during OT/Pen, only Handicap lines between -1 and +1 are affected. For those, both double win and double loss scenarios are possible, depending on the exact line, the final score and the winner after OT/Pen.",
+    "cases": [
+        {
+            "when": {
+                "a": {
+                    "line": {
+                        "abs_min": 1.5
+                    }
+                }
+            },
+            "level": "compatible",
+            "description": "Overtime is only played on a tie, and adds at most one goal, so the winning margin never moves further than 1. A handicap of 1.5 or more therefore settles the same way at $A and at $B."
+        }
+    ]
+}
