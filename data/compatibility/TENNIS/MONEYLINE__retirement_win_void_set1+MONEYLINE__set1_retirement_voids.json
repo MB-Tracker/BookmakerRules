@@ -1,4 +1,4 @@
 {
-    "level": "incompatible",
-    "description": "If player A retires, and B wins:\n- $B -> A, $A -> B : Bet A is refunded and bet B is won -> Extra win\n- $A -> A, $B -> B : Bet A looses and bet B is refunded, leaving you with the loss of Bet A"
+    "level": "additional_profit",
+    "description": "1st Set retirement: $A VOID & $B VOID\n\nAfter Set 1:\n$A: Player A - $B: Player B\n- A retires: $A VOID, $B WIN -> Extra Profit\n- B retires: $A WIN, $B LOSE -> normal outcome"
 }

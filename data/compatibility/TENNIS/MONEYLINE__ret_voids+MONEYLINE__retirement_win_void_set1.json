@@ -1,4 +1,4 @@
 {
     "level": "additional_profit",
-    "description": "Worst case, all bets are void. Best case the player of $A retires, $A refunds, and $B settles your bet as won -> Full Profit at $B."
+    "description": "$A: Player A - $B: Player B\n- A retires: \n  - 1st Set: $A VOID, $B VOID\n  - afterwards: $A VOID, $B WIN -> Extra Profit\n- B retires: $A VOID, $B VOID"
 }
