@@ -24,7 +24,12 @@ export default function CompatibilitySection({ sport, marketsData, entries, onCh
   const missing = useMemo(() => {
     const out = [];
     for (const market of markets) {
-      const assigned = [...new Set(marketsData[market].assignments.map((b) => b.rule))].sort();
+      // Every variant, not one per bookmaker: a bookmaker with a different rule
+      // for ATP than for ITF is two bets somebody can place, and each of them
+      // needs an entry against the other bookmaker's rule.
+      const assigned = [...new Set(
+        marketsData[market].assignments.flatMap((b) => b.variants.map((v) => v.rule))
+      )].sort();
       for (let i = 0; i < assigned.length; i++) {
         for (let j = i + 1; j < assigned.length; j++) {
           const slug = pairSlug(market, assigned[i], market, assigned[j]);

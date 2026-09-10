@@ -175,33 +175,103 @@ def validate_rules() -> None:
 ISO_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}")
 
 
+#: The longest a variant's `case` may be. It is drawn in a tooltip under the
+#: verdict it belongs to, on a row of search results — a label, not a rule text.
+MAX_CASE_LENGTH = 80
+
+
+def assignment_variants(d) -> list[dict]:
+    """
+    One assignment file as a list of variants, whichever shape it is written in.
+
+    A bookmaker that settles a market one way has `{rule, last_checked}`; one
+    that settles it differently depending on the competition — Winamax's tennis
+    retirement rule is one for ATP and another for ITF — has `variants`. Both
+    read as a list here, so everything downstream has one shape to handle and a
+    file only grows the extra key when it has something to say with it.
+    """
+    if not isinstance(d, dict):
+        return []
+    variants = d.get("variants")
+    if isinstance(variants, list):
+        return [v for v in variants if isinstance(v, dict)]
+    if d.get("rule") is not None:
+        return [{"case": "", "rule": d.get("rule"), "last_checked": d.get("last_checked")}]
+    return []
+
+
 def validate_bookmaker_assignments(bookmakers: dict, require_last_checked: set[str]) -> None:
     for f in SPORTS_DIR.rglob("bookmakers/*.json"):
         d = load_json(f)
         if d is None:
             continue
         if not isinstance(d, dict):
-            err(f, "must be a JSON object {rule, last_checked}")
+            err(f, "must be a JSON object {rule, last_checked} or {summary, variants}")
             continue
-        rule = d.get("rule")
-        last_checked = d.get("last_checked")
-        if not isinstance(rule, str) or not rule.strip():
-            err(f, "'rule' must be a non-empty string")
-            continue
-        if last_checked is not None and (
-            not isinstance(last_checked, str) or not ISO_RE.match(last_checked)
-        ):
-            err(f, "'last_checked' must be an ISO 8601 datetime string or null")
 
         if f.stem not in bookmakers:
             err(f, f"unknown bookmaker '{f.stem}' — add it to data/bookmakers.json first")
 
-        market_dir = f.parent.parent
-        if rule not in rule_slugs(market_dir):
-            err(f, f"'rule' value '{rule}' does not match any slug in {market_dir}/rules/")
+        raw_variants = d.get("variants")
+        if raw_variants is not None:
+            if not isinstance(raw_variants, list) or not raw_variants:
+                err(f, "'variants' must be a non-empty array")
+                continue
+            if any(not isinstance(v, dict) for v in raw_variants):
+                err(f, "every entry of 'variants' must be an object {case, rule, last_checked}")
+                continue
+            if "rule" in d:
+                err(f, "a file with 'variants' must not also carry a top-level 'rule'")
 
-        if str(f) in require_last_checked and not last_checked:
-            err(f, "changed bookmaker assignment must have 'last_checked' set (not null) — see CONTRIBUTE.md")
+        summary = d.get("summary")
+        if summary is not None and (not isinstance(summary, str) or not summary.strip()):
+            err(f, "'summary' must be a non-empty string when present")
+
+        variants = assignment_variants(d)
+        if not variants:
+            err(f, "'rule' must be a non-empty string")
+            continue
+
+        market_dir = f.parent.parent
+        slugs = rule_slugs(market_dir)
+        seen_cases: set[str] = set()
+
+        for i, variant in enumerate(variants):
+            where = "" if len(variants) == 1 and raw_variants is None else f"variants[{i}]."
+            rule = variant.get("rule")
+            last_checked = variant.get("last_checked")
+
+            if not isinstance(rule, str) or not rule.strip():
+                err(f, f"'{where}rule' must be a non-empty string")
+                continue
+            if rule not in slugs:
+                err(f, f"'{where}rule' value '{rule}' does not match any slug in {market_dir}/rules/")
+            if last_checked is not None and (
+                not isinstance(last_checked, str) or not ISO_RE.match(last_checked)
+            ):
+                err(f, f"'{where}last_checked' must be an ISO 8601 datetime string or null")
+            if str(f) in require_last_checked and not last_checked:
+                err(f, "changed bookmaker assignment must have 'last_checked' set (not null) — see CONTRIBUTE.md")
+
+            case = variant.get("case", "")
+            if case is not None and not isinstance(case, str):
+                err(f, f"'{where}case' must be a string")
+                continue
+            case = (case or "").strip()
+            # A case is what tells the two variants apart wherever they are
+            # shown, so with more than one of them it is the point of the file.
+            if len(variants) > 1:
+                if not case:
+                    err(f, f"'{where}case' is required when a file has several variants")
+                elif len(case) > MAX_CASE_LENGTH:
+                    err(f, f"'{where}case' must be at most {MAX_CASE_LENGTH} characters — it is drawn in a tooltip")
+                if case and case.casefold() in seen_cases:
+                    err(f, f"'{where}case' repeats an earlier variant's case — cases must be distinguishable")
+                seen_cases.add(case.casefold())
+
+        rules_used = [v.get("rule") for v in variants if isinstance(v.get("rule"), str)]
+        if len(set(rules_used)) != len(rules_used):
+            err(f, "the same rule is assigned to two variants — merge their cases instead")
 
 
 # ── data/compatibility/<SPORT>/<MA>__<ra>+<MB>__<rb>.json ────────────────────
@@ -350,9 +420,12 @@ def validate_missing_compat() -> None:
             continue
         rules = set()
         for f in bm_dir.glob("*.json"):
-            d = load_json(f)
-            if isinstance(d, dict) and isinstance(d.get("rule"), str):
-                rules.add(d["rule"])
+            # Every variant counts: a bookmaker with two rules for one market is
+            # two bets somebody can place, and both need an entry against the
+            # other bookmaker's rule.
+            for variant in assignment_variants(load_json(f)):
+                if isinstance(variant.get("rule"), str):
+                    rules.add(variant["rule"])
         if rules:
             assigned[(sport, market)] = rules
 

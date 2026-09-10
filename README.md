@@ -66,6 +66,28 @@ There are multiple levels to edit:
 }
 ```
 
+   A bookmaker that settles the same market **differently depending on the
+   competition** — Winamax's tennis retirement rule is one thing on the ATP and
+   WTA tours and another below them — writes `variants` instead:
+```jsonc
+{
+  "summary": "Depends on the tournament tier",   // optional, heads the rules page
+  "variants": [
+    { "case": "ATP · WTA · Grand Slam",  "rule": "<rule-slug>", "last_checked": "<ISO timestamp>" },
+    { "case": "Any other competition",   "rule": "<rule-slug>", "last_checked": "<ISO timestamp>" }
+  ]
+}
+```
+   `case` is free text, at most 80 characters, and required as soon as there is
+   more than one variant: it is what tells them apart, and it is drawn in the
+   tooltip of the payout-rules icon on a search result. Nothing joins it onto a
+   live bet — the matcher sends no competition key — so a bet at a bookmaker
+   with two variants gets **one verdict icon per variant**, each labelled with
+   its case, rather than a single answer the data cannot support.
+
+   Both shapes mean the same thing to every consumer; the flat one is just the
+   single-variant case written short.
+
 5. **Compatibility** between two rules, in `data/compatibility/<SPORT>/`. Each file
    defines the interaction between two rules — which may sit in *different*
    markets, because backing a 1X2 selection at one bookmaker and a Double Chance
@@ -100,6 +122,11 @@ the bookmaker on that side.
 
 **Levels:** `compatible`, `partial`, `incompatible`, `additional_profit`. A pair
 with no file at all reads as *unknown* on the website.
+
+Compatibility is always between two *rules*, never between two bookmakers, so a
+bookmaker with several variants needs no special entry — every rule it can
+settle by needs an entry against the other side's rule, which is what the
+validator demands.
 
 **Cases** make a pair precise: the first one whose condition matches the actual
 bet wins, and the top-level `level` applies when none do. `partial` is the honest

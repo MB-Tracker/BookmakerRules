@@ -19,6 +19,9 @@ export default function MarketSection({ sport, market, marketDef, bookmakers, ru
   const assignedSlugs = new Set(assignments.map((b) => b.bookmaker));
   const unassigned = Object.entries(bookmakers).filter(([slug]) => !assignedSlugs.has(slug));
   const ruleLabel = (slug) => rules.find((r) => r.name === slug)?.label ?? slug;
+  // The oldest of the variants' dates: the assignment is only as verified as
+  // its least recently checked half.
+  const lastChecked = (bm) => bm.variants.map((v) => v.last_checked).filter(Boolean).sort()[0] ?? null;
 
   const stop = (fn) => (e) => { e.stopPropagation(); fn(e); };
 
@@ -55,19 +58,44 @@ export default function MarketSection({ sport, market, marketDef, bookmakers, ru
   // ── Bookmaker assignments ──
 
   const openBmModal = (bm = null) => {
-    setFormData(bm ? { bookmaker: bm.bookmaker, rule: bm.rule } : { bookmaker: "", rule: "" });
+    setFormData(bm
+      ? { bookmaker: bm.bookmaker, summary: bm.summary ?? "", variants: bm.variants.map((v) => ({ ...v })) }
+      : { bookmaker: "", summary: "", variants: [{ case: "", rule: "" }] });
     setError("");
     setModal({ type: "bm", editing: bm });
   };
 
+  // ── Variants ──
+  //
+  // A bookmaker usually settles a market one way, and then the case is left
+  // empty and the file stays flat. Winamax's tennis retirement rule is the
+  // other kind: one rule for ATP and WTA, another for everything below them,
+  // and no way to tell which applies from the bet alone — so the case is
+  // written out and shown wherever the verdict is.
+
+  const setVariant = (i, patch) => setFormData((d) => ({
+    ...d,
+    variants: d.variants.map((v, j) => (j === i ? { ...v, ...patch } : v)),
+  }));
+
+  const addVariant = () => setFormData((d) => ({ ...d, variants: [...d.variants, { case: "", rule: "" }] }));
+
+  const removeVariant = (i) => setFormData((d) => ({ ...d, variants: d.variants.filter((_, j) => j !== i) }));
+
   const saveBm = async (e) => {
     e.preventDefault();
     setError("");
+    // Dropping last_checked on an edited variant is what makes the server stamp
+    // it: the assignment was just looked at, which is the whole point of the date.
+    const payload = {
+      summary: formData.variants.length > 1 ? formData.summary : "",
+      variants: formData.variants.map((v) => ({ case: v.case, rule: v.rule })),
+    };
     try {
       if (modal.editing) {
-        await api.updateBookmakerRule(sport, market, modal.editing.bookmaker, { rule: formData.rule });
+        await api.updateBookmakerRule(sport, market, modal.editing.bookmaker, payload);
       } else {
-        await api.assignBookmaker(sport, market, formData);
+        await api.assignBookmaker(sport, market, { bookmaker: formData.bookmaker, ...payload });
       }
       setModal(null);
       onChanged();
@@ -140,15 +168,23 @@ export default function MarketSection({ sport, market, marketDef, bookmakers, ru
               ? <p className="text-muted small mb-0">No bookmakers assigned.</p>
               : <div className="d-flex flex-column gap-1">
                   {assignments.map((b) => (
-                    <div key={b.bookmaker} className="d-flex align-items-center bg-white border rounded px-3 py-2">
-                      <span className="fw-medium flex-grow-1">{bookmakers[b.bookmaker]?.display ?? b.bookmaker}</span>
-                      <span className="text-muted small me-3">→ {ruleLabel(b.rule)}</span>
-                      <span className="text-muted small me-3" title="Last checked">
-                        {b.last_checked
-                          ? new Date(b.last_checked).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" })
+                    <div key={b.bookmaker} className="d-flex align-items-start bg-white border rounded px-3 py-2">
+                      <div className="flex-grow-1">
+                        <span className="fw-medium">{bookmakers[b.bookmaker]?.display ?? b.bookmaker}</span>
+                        {b.summary && <span className="text-muted small ms-2">{b.summary}</span>}
+                        {b.variants.map((v, i) => (
+                          <div key={i} className="text-muted small">
+                            {v.case && <span className="badge bg-secondary me-2">{v.case}</span>}
+                            → {ruleLabel(v.rule)}
+                          </div>
+                        ))}
+                      </div>
+                      <span className="text-muted small mx-3" title="Last checked">
+                        {lastChecked(b)
+                          ? new Date(lastChecked(b)).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" })
                           : <em>never checked</em>}
                       </span>
-                      <div className="d-flex gap-1">
+                      <div className="d-flex gap-1 flex-shrink-0">
                         <button className="btn btn-sm btn-outline-success" title="Mark as checked now"
                           onClick={async () => { await api.touchBookmakerCheck(sport, market, b.bookmaker); onChanged(); }}>✓</button>
                         <button className="btn btn-sm btn-outline-secondary" onClick={() => openBmModal(b)}>Edit</button>
@@ -201,14 +237,51 @@ export default function MarketSection({ sport, market, marketDef, bookmakers, ru
               ))}
             </select>
           </div>
-          <div className="mb-0">
-            <label className="form-label">Rule</label>
-            <select className="form-select" value={formData.rule}
-              onChange={(e) => setFormData({ ...formData, rule: e.target.value })} required>
-              <option value="">— select —</option>
-              {rules.map((r) => <option key={r.name} value={r.name}>{r.label}</option>)}
-            </select>
+          <div className="mb-3">
+            <label className="form-label">
+              Rule{formData.variants?.length > 1 ? "s" : ""}
+              {formData.variants?.length > 1 && (
+                <span className="text-muted small ms-2">
+                  the case says when each applies — it is shown in the tooltip on a search result
+                </span>
+              )}
+            </label>
+            <div className="d-flex flex-column gap-2">
+              {(formData.variants ?? []).map((v, i) => (
+                <div key={i} className="d-flex gap-2">
+                  {formData.variants.length > 1 && (
+                    <input className="form-control" style={{ maxWidth: "14rem" }} value={v.case}
+                      onChange={(e) => setVariant(i, { case: e.target.value })}
+                      required maxLength={80} placeholder="e.g. ATP · WTA · Grand Slam" />
+                  )}
+                  <select className="form-select" value={v.rule}
+                    onChange={(e) => setVariant(i, { rule: e.target.value })} required>
+                    <option value="">— select —</option>
+                    {rules.map((r) => <option key={r.name} value={r.name}>{r.label}</option>)}
+                  </select>
+                  {formData.variants.length > 1 && (
+                    <button type="button" className="btn btn-outline-danger flex-shrink-0"
+                      onClick={() => removeVariant(i)} title="Remove this case">×</button>
+                  )}
+                </div>
+              ))}
+            </div>
+            {rules.length > (formData.variants?.length ?? 0) && (
+              <button type="button" className="btn btn-sm btn-link px-0 mt-1" onClick={addVariant}>
+                + Different rule for some competitions
+              </button>
+            )}
           </div>
+          {formData.variants?.length > 1 && (
+            <div className="mb-0">
+              <label className="form-label">
+                Summary <span className="text-muted small">(optional, heads the rules page)</span>
+              </label>
+              <input className="form-control" value={formData.summary}
+                onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
+                maxLength={80} placeholder="e.g. Depends on the tournament tier" />
+            </div>
+          )}
         </Modal>
       )}
     </div>

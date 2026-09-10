@@ -199,10 +199,80 @@ app.delete("/api/sports/:sport/markets/:market/rules/:rule", (req, res) => {
 
 // ── Bookmaker assignments ─────────────────────────────────────────────────────
 
+/**
+ * One assignment file, as the variant list everything above works in.
+ *
+ * A bookmaker that settles a market one way is `{rule, last_checked}`; one that
+ * settles it differently depending on the competition — Winamax's tennis
+ * retirement rule is one thing for ATP and another for ITF — carries `variants`
+ * instead. The editor only ever sees the list, so the two shapes are a fact
+ * about the file rather than about the UI.
+ */
 const readBm = (file) => {
   const raw = read(file);
-  return { rule: raw.rule, last_checked: raw.last_checked ?? null };
+  const variants = Array.isArray(raw.variants)
+    ? raw.variants.map((v) => ({ case: v.case ?? "", rule: v.rule, last_checked: v.last_checked ?? null }))
+    : [{ case: "", rule: raw.rule, last_checked: raw.last_checked ?? null }];
+  return { summary: raw.summary ?? "", variants };
 };
+
+/**
+ * Write it back in the smallest shape that says what it means.
+ *
+ * One unconditional variant is written as the flat `{rule, last_checked}` the
+ * repository has always used: three hundred files say that, and rewriting them
+ * all into a one-element list would be a diff nobody could read for no
+ * information gained.
+ */
+const writeBm = (file, { summary, variants }) => {
+  if (variants.length === 1 && !String(variants[0].case ?? "").trim()) {
+    write(file, { rule: variants[0].rule, last_checked: variants[0].last_checked });
+    return;
+  }
+  write(file, {
+    ...(summary ? { summary } : {}),
+    variants: variants.map((v) => ({
+      case: String(v.case ?? "").trim(),
+      rule: v.rule,
+      last_checked: v.last_checked,
+    })),
+  });
+};
+
+/**
+ * The variants of a request body, or `{ error }`.
+ *
+ * Accepts the old `{ rule }` body as one unconditional variant so a client that
+ * has not been reloaded still works.
+ */
+function bmBody(req, sport, market) {
+  const now = new Date().toISOString();
+  const raw = Array.isArray(req.body.variants)
+    ? req.body.variants
+    : [{ case: "", rule: req.body.rule }];
+
+  if (raw.length === 0) return { error: "at least one variant is required" };
+
+  const slugs = new Set(jsonNames(rulesDir(sport, market)).map((f) => f.replace(/\.json$/, "")));
+  const seen = new Set();
+  const variants = [];
+
+  for (const v of raw) {
+    const rule = v?.rule;
+    if (typeof rule !== "string" || !rule.trim()) return { error: "every variant needs a rule" };
+    if (!slugs.has(rule)) return { error: `rule '${rule}' does not exist in ${sport} / ${market}`};
+    if (seen.has(rule)) return { error: `rule '${rule}' is used by two variants — merge their cases instead` };
+    seen.add(rule);
+    const kase = String(v.case ?? "").trim();
+    if (raw.length > 1 && !kase) return { error: "every variant needs a case when there is more than one" };
+    if (kase.length > 80) return { error: "a case must be at most 80 characters — it is drawn in a tooltip" };
+    // Touched on every write: a variant that was edited was, by definition,
+    // just looked at, and the contribution rules ask for that date.
+    variants.push({ case: kase, rule, last_checked: v.last_checked ?? now });
+  }
+
+  return { summary: String(req.body.summary ?? "").trim(), variants };
+}
 
 app.get("/api/sports/:sport/markets/:market/bookmakers", (req, res) => {
   const { sport, market } = req.params;
@@ -212,24 +282,26 @@ app.get("/api/sports/:sport/markets/:market/bookmakers", (req, res) => {
 
 app.post("/api/sports/:sport/markets/:market/bookmakers", (req, res) => {
   const { sport, market } = req.params;
-  const { bookmaker, rule } = req.body;
+  const { bookmaker } = req.body;
   if (!exists(marketDir(sport, market))) return notFound(res);
   if (!vocabBookmakers()[bookmaker]) return bad(res, `unknown bookmaker '${bookmaker}' — add it to data/bookmakers.json first`);
   const file = join(bmDir(sport, market), `${bookmaker}.json`);
   if (exists(file)) return conflict(res, "bookmaker already assigned for this market");
+  const body = bmBody(req, sport, market);
+  if (body.error) return bad(res, body.error);
   mkdir(bmDir(sport, market));
-  const last_checked = new Date().toISOString();
-  write(file, { rule, last_checked });
-  res.status(201).json({ bookmaker, rule, last_checked });
+  writeBm(file, body);
+  res.status(201).json({ bookmaker, ...readBm(file) });
 });
 
 app.put("/api/sports/:sport/markets/:market/bookmakers/:bookmaker", (req, res) => {
   const { sport, market, bookmaker } = req.params;
   const file = join(bmDir(sport, market), `${bookmaker}.json`);
   if (!exists(file)) return notFound(res);
-  const last_checked = new Date().toISOString();
-  write(file, { rule: req.body.rule, last_checked });
-  res.json({ bookmaker, rule: req.body.rule, last_checked });
+  const body = bmBody(req, sport, market);
+  if (body.error) return bad(res, body.error);
+  writeBm(file, body);
+  res.json({ bookmaker, ...readBm(file) });
 });
 
 app.patch("/api/sports/:sport/markets/:market/bookmakers/:bookmaker/check", (req, res) => {
@@ -238,8 +310,10 @@ app.patch("/api/sports/:sport/markets/:market/bookmakers/:bookmaker/check", (req
   if (!exists(file)) return notFound(res);
   const current = readBm(file);
   const last_checked = new Date().toISOString();
-  write(file, { ...current, last_checked });
-  res.json({ bookmaker, rule: current.rule, last_checked });
+  // Every variant at once: the check is "I have just read this bookmaker's
+  // terms for this market", which is one act however many rules it found.
+  writeBm(file, { ...current, variants: current.variants.map((v) => ({ ...v, last_checked })) });
+  res.json({ bookmaker, ...readBm(file) });
 });
 
 app.delete("/api/sports/:sport/markets/:market/bookmakers/:bookmaker", (req, res) => {
