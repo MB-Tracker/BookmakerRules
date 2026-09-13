@@ -29,6 +29,12 @@
         "outcomes": ["OVER", "UNDER"],
         "sports": ["FOOTBALL", "BASKETBALL", "TENNIS", "ICE_HOCKEY", "AMERICAN_FOOTBALL"]
     },
+    "OVER_UNDER_INCL_OT": {
+        "label": "Total Goals Incl. OT",
+        "has_line": true,
+        "outcomes": ["OVER", "UNDER"],
+        "sports": ["ICE_HOCKEY"]
+    },
     "TEAM_OVER_UNDER_HOME": {
         "label": "Home Team Total",
         "has_line": true,
@@ -76,6 +82,34 @@
         ],
         "sports": ["FOOTBALL"]
     },
+    "HALFTIME_1X2": {
+        "label": "Halftime Result",
+        "has_line": false,
+        "outcomes": ["HOME", "DRAW", "AWAY"],
+        "sports": ["FOOTBALL"]
+    },
+    "HALFTIME_FULLTIME": {
+        "label": "Halftime/Fulltime",
+        "has_line": false,
+        "outcomes": [
+            "HOME_HOME", "HOME_DRAW", "HOME_AWAY", "DRAW_HOME",
+            "DRAW_DRAW", "DRAW_AWAY", "AWAY_HOME", "AWAY_DRAW",
+            "AWAY_AWAY"
+        ],
+        "sports": ["FOOTBALL"]
+    },
+    "WIN_TO_NIL_HOME": {
+        "label": "Home Team Win To Nil",
+        "has_line": false,
+        "outcomes": ["YES", "NO"],
+        "sports": ["FOOTBALL"]
+    },
+    "WIN_TO_NIL_AWAY": {
+        "label": "Away Team Win To Nil",
+        "has_line": false,
+        "outcomes": ["YES", "NO"],
+        "sports": ["FOOTBALL"]
+    },
     "TOTAL_SETS": {
         "label": "Total Sets",
         "has_line": true,
@@ -85,6 +119,58 @@
     "SET_HANDICAP": {
         "label": "Set Handicap",
         "has_line": true,
+        "outcomes": ["HOME", "AWAY"],
+        "sports": ["TENNIS"]
+    },
+    "SET_BETTING": {
+        "label": "Set Betting",
+        "has_line": false,
+        "outcomes": [
+            "SETS_2_0", "SETS_0_2", "SETS_2_1", "SETS_1_2",
+            "SETS_3_0", "SETS_0_3", "SETS_3_1", "SETS_1_3",
+            "SETS_3_2", "SETS_2_3"
+        ],
+        "sports": ["TENNIS"]
+    },
+    "PLAYER_SETS_HOME": {
+        "label": "Home Player Total Sets",
+        "has_line": true,
+        "outcomes": ["OVER", "UNDER"],
+        "sports": ["TENNIS"]
+    },
+    "PLAYER_SETS_AWAY": {
+        "label": "Away Player Total Sets",
+        "has_line": true,
+        "outcomes": ["OVER", "UNDER"],
+        "sports": ["TENNIS"]
+    },
+    "SET_WINNER_1": {
+        "label": "Set 1 Winner",
+        "has_line": false,
+        "outcomes": ["HOME", "AWAY"],
+        "sports": ["TENNIS"]
+    },
+    "SET_WINNER_2": {
+        "label": "Set 2 Winner",
+        "has_line": false,
+        "outcomes": ["HOME", "AWAY"],
+        "sports": ["TENNIS"]
+    },
+    "SET_WINNER_3": {
+        "label": "Set 3 Winner",
+        "has_line": false,
+        "outcomes": ["HOME", "AWAY"],
+        "sports": ["TENNIS"]
+    },
+    "SET_WINNER_4": {
+        "label": "Set 4 Winner",
+        "has_line": false,
+        "outcomes": ["HOME", "AWAY"],
+        "sports": ["TENNIS"]
+    },
+    "SET_WINNER_5": {
+        "label": "Set 5 Winner",
+        "has_line": false,
         "outcomes": ["HOME", "AWAY"],
         "sports": ["TENNIS"]
     },
