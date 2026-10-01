@@ -47,6 +47,10 @@
         "display": "LeoVegas",
         "mb_tracker_ids": [24]
     },
+    "letsbet": {
+        "display": "LetsBet",
+        "mb_tracker_ids": [40]
+    },
     "merkurbets": {
         "display": "MerkurBets",
         "mb_tracker_ids": [25]
