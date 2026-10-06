@@ -207,6 +207,13 @@ export default function CompatibilityModal({ sport, entry, prefill, marketsData,
         <div className="text-muted mt-1">
           Write <code>$A</code> and <code>$B</code> in a description to name the bookmaker on that side.
         </div>
+        {sideKey(sides[0].market, sides[0].rule) === sideKey(sides[1].market, sides[1].rule) && (
+          <div className="text-warning-emphasis mt-1">
+            Same rule on both sides: which bookmaker is A is not fixed, so write cases and
+            descriptions that read the same with A and B swapped. Without this entry the
+            pair reads as compatible.
+          </div>
+        )}
       </div>
 
       <div className="mb-3">

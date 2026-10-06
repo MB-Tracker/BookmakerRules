@@ -55,6 +55,8 @@ export default function CompatibilitySection({ sport, marketsData, entries, onCh
   };
 
   // Every rule of every market, so a cross-market pair can be started by hand.
+  // The same rule on both sides is allowed too: with no entry it reads as
+  // compatible, but a rule that pays out early (2UP) can pay both legs.
   const allSides = markets.flatMap((m) => marketsData[m].rules.map((r) => ({ market: m, rule: r.name })));
 
   const [newA, setNewA] = useState("");
@@ -137,7 +139,7 @@ export default function CompatibilitySection({ sport, marketsData, entries, onCh
         )}
       </div>
 
-      {allSides.length >= 2 && (
+      {allSides.length > 0 && (
         <div className="d-flex gap-2 align-items-center mt-3">
           <select className="form-select form-select-sm w-auto" value={newA} onChange={(e) => setNewA(e.target.value)}>
             <option value="">— rule A —</option>
@@ -152,7 +154,7 @@ export default function CompatibilitySection({ sport, marketsData, entries, onCh
               <option key={sideKey(s.market, s.rule)} value={sideKey(s.market, s.rule)}>{sideText(s.market, s.rule)}</option>
             ))}
           </select>
-          <button className="btn btn-sm btn-outline-primary" disabled={!newA || !newB || newA === newB} onClick={startNew}>
+          <button className="btn btn-sm btn-outline-primary" disabled={!newA || !newB} onClick={startNew}>
             Define pair
           </button>
         </div>
