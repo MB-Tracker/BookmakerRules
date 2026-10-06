@@ -13,7 +13,7 @@
                 }
             },
             "level": "additional_profit",
-            "description": "$B pays the 1X2 bet out as soon as the backed team leads by two goals. If the opponent then comes back to a draw or a win, the Double Chance at $A wins as well and both legs are paid."
+            "description": "$B pays the 1X2 bet out as soon as the backed team leads by 2 goals. If the opponent then comes back to a draw or a win, the Double Chance at $A wins as well and both legs are paid."
         }
     ]
 }

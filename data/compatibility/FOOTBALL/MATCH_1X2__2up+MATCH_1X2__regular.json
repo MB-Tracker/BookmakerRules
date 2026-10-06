@@ -13,7 +13,7 @@
                 }
             },
             "level": "additional_profit",
-            "description": "If the team of $A leads at any point, the bet is immediately paid out, no matter the end result."
+            "description": "If the team of $A leads by 2 goals at any point, the bet is immediately paid out, no matter the end result."
         }
     ]
 }
