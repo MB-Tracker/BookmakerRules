@@ -16,6 +16,40 @@
         --bs-alert-bg: #e7dbf7;
         --bs-alert-border-color: #d3bff0;
       }
+      .text-none { text-transform: none; letter-spacing: normal; }
+      .border-dashed { border-style: dashed !important; }
+      .pane-title {
+        font-size: .75rem; font-weight: 600; letter-spacing: .05em;
+        text-transform: uppercase; color: var(--bs-secondary-color); margin-bottom: .75rem;
+      }
+      .tabbar {
+        display: flex; flex-wrap: nowrap; overflow-x: auto; white-space: nowrap;
+        border-bottom: 1px solid var(--bs-border-color); scrollbar-width: thin;
+      }
+      .tabbar-item {
+        flex-shrink: 0; border: 0; background: none; padding: .55rem 1rem;
+        color: var(--bs-secondary-color); font-weight: 500;
+        border-bottom: 3px solid transparent;
+      }
+      .tabbar-item:hover { color: var(--bs-body-color); background: var(--bs-tertiary-bg); }
+      .tabbar-item.active {
+        color: var(--bs-primary); font-weight: 700;
+        border-bottom-color: var(--bs-primary);
+        background: rgba(var(--bs-primary-rgb), .08);
+      }
+      .tabbar.fade-right { mask-image: linear-gradient(to right, #000 calc(100% - 3rem), transparent); }
+      .tabbar.fade-left { mask-image: linear-gradient(to left, #000 calc(100% - 3rem), transparent); }
+      .tabbar.fade-both { mask-image: linear-gradient(to right, transparent, #000 3rem, #000 calc(100% - 3rem), transparent); }
+      .tabbar-sm .tabbar-item { padding: .35rem .75rem; font-size: .875rem; }
+      .tabbar-extra { flex-shrink: 0; display: flex; align-items: center; padding: 0 .5rem; }
+      /* On a wide screen the page itself does not scroll: the sport tabs stay
+         put and compatibility and markets scroll side by side, each on its own.
+         Narrower than that, the two stack and the page scrolls as usual. */
+      @media (min-width: 992px) {
+        .app { height: 100vh; display: flex; flex-direction: column; }
+        .split { flex-grow: 1; min-height: 0; }
+        .split > .pane { height: 100%; overflow-y: auto; padding-bottom: 1rem; }
+      }
     </style>
   </head>
   <body>

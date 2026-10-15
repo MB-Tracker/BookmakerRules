@@ -7,40 +7,44 @@ const sideKey = (market, rule) => `${market}__${rule}`;
 const pairSlug = (ma, ra, mb, rb) => [sideKey(ma, ra), sideKey(mb, rb)].sort().join("+");
 
 /**
- * Every rule pair of one sport, defined or not.
+ * Every rule pair of one sport that involves `market`, defined or not — at
+ * least one side has to be one of its rules, so the pane follows the market
+ * tab next to it.
  *
  * "Not defined" is only flagged for pairs *within* one market between rules that
  * are actually assigned to a bookmaker — those are bets somebody can place
  * today. Cross-market pairs can be added from the button, but are not demanded:
  * which markets oppose each other is the matcher's model, not this repo's.
  */
-export default function CompatibilitySection({ sport, marketsData, entries, onChanged }) {
+export default function CompatibilitySection({ sport, market, marketsData, entries, onChanged }) {
   const [modal, setModal] = useState(null);
 
   const markets = Object.keys(marketsData).sort();
 
   const definedSlugs = useMemo(() => new Set(entries.map((e) => e.slug)), [entries]);
 
+  const shown = entries.filter((e) => e.market_a === market || e.market_b === market);
+
+  // Only pairs within one market are demanded, so only the selected one is walked.
   const missing = useMemo(() => {
     const out = [];
-    for (const market of markets) {
-      // Every variant, not one per bookmaker: a bookmaker with a different rule
-      // for ATP than for ITF is two bets somebody can place, and each of them
-      // needs an entry against the other bookmaker's rule.
-      const assigned = [...new Set(
-        marketsData[market].assignments.flatMap((b) => b.variants.map((v) => v.rule))
-      )].sort();
-      for (let i = 0; i < assigned.length; i++) {
-        for (let j = i + 1; j < assigned.length; j++) {
-          const slug = pairSlug(market, assigned[i], market, assigned[j]);
-          if (!definedSlugs.has(slug)) {
-            out.push({ slug, market_a: market, rule_a: assigned[i], market_b: market, rule_b: assigned[j] });
-          }
+    if (!marketsData[market]) return out;
+    // Every variant, not one per bookmaker: a bookmaker with a different rule
+    // for ATP than for ITF is two bets somebody can place, and each of them
+    // needs an entry against the other bookmaker's rule.
+    const assigned = [...new Set(
+      marketsData[market].assignments.flatMap((b) => b.variants.map((v) => v.rule))
+    )].sort();
+    for (let i = 0; i < assigned.length; i++) {
+      for (let j = i + 1; j < assigned.length; j++) {
+        const slug = pairSlug(market, assigned[i], market, assigned[j]);
+        if (!definedSlugs.has(slug)) {
+          out.push({ slug, market_a: market, rule_a: assigned[i], market_b: market, rule_b: assigned[j] });
         }
       }
     }
     return out;
-  }, [markets, marketsData, definedSlugs]);
+  }, [market, marketsData, definedSlugs]);
 
   const ruleLabel = (market, rule) =>
     marketsData[market]?.rules.find((r) => r.name === rule)?.label ?? rule;
@@ -58,6 +62,8 @@ export default function CompatibilitySection({ sport, marketsData, entries, onCh
   // The same rule on both sides is allowed too: with no entry it reads as
   // compatible, but a rule that pays out early (2UP) can pay both legs.
   const allSides = markets.flatMap((m) => marketsData[m].rules.map((r) => ({ market: m, rule: r.name })));
+  // Side A is the selected market's, so a new pair always shows up in this pane.
+  const ownSides = allSides.filter((s) => s.market === market);
 
   const [newA, setNewA] = useState("");
   const [newB, setNewB] = useState("");
@@ -71,14 +77,10 @@ export default function CompatibilitySection({ sport, marketsData, entries, onCh
   };
 
   return (
-    <div className="px-3 py-3 bg-white border-top">
-      <span className="text-uppercase fw-semibold small text-muted" style={{ letterSpacing: ".05em" }}>
-        Compatibility
-      </span>
-
-      <div className="d-flex flex-column gap-2 mt-2">
+    <div>
+      <div className="d-flex flex-column gap-2">
         {missing.map((pair) => (
-          <div key={pair.slug} className="alert alert-warning border-warning py-2 mb-0 d-flex align-items-center gap-3">
+          <div key={pair.slug} className="alert alert-warning border-warning py-2 mb-0 d-flex align-items-center flex-wrap gap-2">
             <span className="fw-medium">
               {sideText(pair.market_a, pair.rule_a)}
               <span className="opacity-50 mx-2">×</span>
@@ -93,9 +95,9 @@ export default function CompatibilitySection({ sport, marketsData, entries, onCh
           </div>
         ))}
 
-        {entries.map((entry) => (
+        {shown.map((entry) => (
           <div key={entry.slug} className={`alert py-2 mb-0 ${LEVEL_CLASS[entry.level] ?? "alert-secondary"}`}>
-            <div className="d-flex align-items-center gap-3">
+            <div className="d-flex align-items-center flex-wrap gap-2">
               <span className="fw-medium">
                 {sideText(entry.market_a, entry.rule_a)}
                 <span className="opacity-50 mx-2">×</span>
@@ -134,21 +136,21 @@ export default function CompatibilitySection({ sport, marketsData, entries, onCh
           </div>
         ))}
 
-        {entries.length === 0 && missing.length === 0 && (
+        {shown.length === 0 && missing.length === 0 && (
           <p className="text-muted small mb-0">Nothing to compare yet.</p>
         )}
       </div>
 
-      {allSides.length > 0 && (
-        <div className="d-flex gap-2 align-items-center mt-3">
-          <select className="form-select form-select-sm w-auto" value={newA} onChange={(e) => setNewA(e.target.value)}>
+      {ownSides.length > 0 && (
+        <div className="d-flex flex-wrap gap-2 align-items-center mt-3 border border-dashed rounded p-2">
+          <select className="form-select form-select-sm w-auto mw-100" value={newA} onChange={(e) => setNewA(e.target.value)}>
             <option value="">— rule A —</option>
-            {allSides.map((s) => (
+            {ownSides.map((s) => (
               <option key={sideKey(s.market, s.rule)} value={sideKey(s.market, s.rule)}>{sideText(s.market, s.rule)}</option>
             ))}
           </select>
           <span className="text-muted">×</span>
-          <select className="form-select form-select-sm w-auto" value={newB} onChange={(e) => setNewB(e.target.value)}>
+          <select className="form-select form-select-sm w-auto mw-100" value={newB} onChange={(e) => setNewB(e.target.value)}>
             <option value="">— rule B —</option>
             {allSides.map((s) => (
               <option key={sideKey(s.market, s.rule)} value={sideKey(s.market, s.rule)}>{sideText(s.market, s.rule)}</option>

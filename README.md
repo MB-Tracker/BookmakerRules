@@ -23,6 +23,16 @@ rules, organizing them, and setting compatibility levels and cases.
 
 Editor available at: http://localhost:5173
 
+### Online editor (GitHub Pages)
+
+The same editor is published to GitHub Pages on every push to `main`, running
+entirely in the browser on a snapshot of `data/`. Anyone can browse the rules
+there and make edits; edits stay in their browser until they hit
+**Create GitHub Issue**, which opens an issue prefilled with a summary and the
+full contents of every changed file.
+
+To try the static build locally: `cd editor && npm run dev:pages`.
+
 ## Data Structure
 
 > [!TIP]

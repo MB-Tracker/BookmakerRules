@@ -2,18 +2,18 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { api } from "../api/client.js";
 import MarketSection from "./MarketSection.jsx";
 import CompatibilitySection from "./CompatibilitySection.jsx";
+import TabBar from "./TabBar.jsx";
 
-// ── Sport section ─────────────────────────────────────────────────────────────
+// ── Sport view ────────────────────────────────────────────────────────────────
 
 /**
- * One sport, with everything under it loaded in one pass.
+ * One sport: compatibility on one side, its markets on the other.
  *
  * Rules and bookmaker assignments are fetched here rather than inside each
  * market, because compatibility spans markets and needs all of them at once —
  * and fetching twice would let the two views disagree after an edit.
  */
-function SportSection({ sportKey, sportLabel, exists, markets, vocab, onChanged, missingCount }) {
-  const [open, setOpen] = useState(false);
+function SportView({ sportKey, markets, vocab, onChanged, market, onSelectMarket, missingByMarket }) {
   const [marketsData, setMarketsData] = useState({});
   const [entries, setEntries] = useState([]);
   const [newMarket, setNewMarket] = useState("");
@@ -24,7 +24,6 @@ function SportSection({ sportKey, sportLabel, exists, markets, vocab, onChanged,
   const reload = useCallback(() => { setTick((n) => n + 1); onChanged(); }, [onChanged]);
 
   useEffect(() => {
-    if (!exists || !open) return;
     let cancelled = false;
     Promise.all([
       Promise.all(marketKeys.map(async (m) => [
@@ -42,7 +41,7 @@ function SportSection({ sportKey, sportLabel, exists, markets, vocab, onChanged,
       setEntries(compat);
     });
     return () => { cancelled = true; };
-  }, [sportKey, exists, open, marketKeys, tick]);
+  }, [sportKey, marketKeys, tick]);
 
   // The market definitions come from the vocabulary, not from the API above.
   const withDefs = useMemo(() => {
@@ -58,92 +57,102 @@ function SportSection({ sportKey, sportLabel, exists, markets, vocab, onChanged,
     .filter(([, def]) => (def.sports ?? []).length === 0 || def.sports.includes(sportKey))
     .sort((a, b) => a[1].label.localeCompare(b[1].label));
 
-  const stop = (fn) => (e) => { e.stopPropagation(); fn(e); };
-
-  const create = async () => {
-    try { await api.createSport(sportKey); onChanged(); } catch (err) { setError(err.message); }
-  };
-
   const addMarket = async (e) => {
     e.preventDefault();
     if (!newMarket) return;
     try {
       await api.createMarket(sportKey, newMarket);
       setNewMarket("");
+      setError("");
+      onSelectMarket(newMarket);
       reload();
     } catch (err) { setError(err.message); }
   };
 
+  // Fall back to the first market when the hash names none of this sport's.
+  const current = marketKeys.includes(market) ? market : marketKeys[0] ?? "";
+
   return (
-    <div className={`border rounded overflow-hidden mb-2 ${!exists ? "opacity-50" : ""}`}>
-      <div className={`d-flex align-items-center px-3 py-2 ${exists ? "bg-white" : "bg-light"}`}
-        style={{ cursor: exists ? "pointer" : "default" }}
-        onClick={() => exists && setOpen((v) => !v)}>
-        <span className="me-2 text-muted" style={{ fontSize: ".75rem", width: "1rem" }}>
-          {exists ? (open ? "▾" : "▸") : ""}
-        </span>
-        <span className="fw-semibold flex-grow-1">{sportLabel}</span>
-        <span className="badge bg-light text-secondary border me-2" style={{ fontSize: ".7rem" }}>{sportKey}</span>
-        {exists && missingCount > 0 && <span className="badge bg-warning text-dark me-2">⚠ {missingCount}</span>}
-        {exists && missingCount === 0 && marketKeys.length > 0 && <span className="badge bg-success me-2">✓</span>}
-        {!exists && <button className="btn btn-sm btn-outline-primary" onClick={stop(create)}>Add</button>}
+    <div className="row g-3 split">
+      <div className="col-lg-5 pane">
+        <h6 className="pane-title">
+          Compatibility
+          {current && <span className="text-body ms-2 text-none">· {vocab.markets[current]?.label ?? current}</span>}
+        </h6>
+        {marketKeys.length > 0
+          ? <CompatibilitySection key={current} sport={sportKey} market={current}
+              marketsData={withDefs} entries={entries} onChanged={reload} />
+          : <p className="text-muted small">Add a market first.</p>}
       </div>
 
-      {exists && open && (
-        <div className="border-top">
-          {marketKeys.length === 0
-            ? <p className="text-muted small px-3 py-2 mb-0">No markets yet.</p>
-            : marketKeys.map((m) => (
-                <MarketSection key={m} sport={sportKey} market={m}
-                  marketDef={vocab.markets[m]}
-                  bookmakers={vocab.bookmakers}
-                  rules={marketsData[m]?.rules ?? []}
-                  assignments={marketsData[m]?.assignments ?? []}
-                  onChanged={reload} />
-              ))
-          }
-
-          {marketKeys.length > 0 && (
-            <CompatibilitySection sport={sportKey} marketsData={withDefs}
-              entries={entries} onChanged={reload} />
-          )}
-
-          <div className="px-3 py-2 bg-white border-top">
-            {error && <div className="alert alert-danger py-1 small mb-2">{error}</div>}
-            <form className="d-flex gap-2" onSubmit={addMarket}>
-              <select className="form-select form-select-sm w-auto" value={newMarket}
+      <div className="col-lg-7 pane">
+        <h6 className="pane-title">Markets</h6>
+        <TabBar small
+          items={marketKeys.map((m) => ({
+            key: m,
+            label: vocab.markets[m]?.label ?? m,
+            badge: missingByMarket[m] > 0 && <span className="badge bg-warning text-dark ms-2">⚠ {missingByMarket[m]}</span>,
+          }))}
+          active={current} onSelect={onSelectMarket}
+          extra={available.length > 0 && (
+            <form className="d-flex gap-1" onSubmit={addMarket}>
+              <select className="form-select form-select-sm border-0 text-muted" value={newMarket}
                 onChange={(e) => setNewMarket(e.target.value)} required>
-                <option value="">— add a market —</option>
+                <option value="">+ market</option>
                 {available.map(([key, def]) => (
                   <option key={key} value={key}>{def.label} ({key})</option>
                 ))}
               </select>
-              <button type="submit" className="btn btn-sm btn-outline-primary" disabled={!newMarket}>Add Market</button>
+              {newMarket && <button type="submit" className="btn btn-sm btn-primary">Add</button>}
             </form>
-            {available.length === 0 && (
-              <div className="form-text">Every market this sport has in data/markets.json is already here.</div>
-            )}
-          </div>
+          )} />
+
+        {error && <div className="alert alert-danger py-1 small mt-2 mb-0">{error}</div>}
+
+        <div className="pt-3">
+          {marketKeys.length === 0 && <p className="text-muted small">No markets yet — add one from the “+ market” menu.</p>}
+          {current && (
+            <MarketSection key={current} sport={sportKey} market={current}
+              marketDef={vocab.markets[current]}
+              bookmakers={vocab.bookmakers}
+              rules={marketsData[current]?.rules ?? []}
+              assignments={marketsData[current]?.assignments ?? []}
+              onChanged={reload} />
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
 
-// ── Main tab ──────────────────────────────────────────────────────────────────
+// ── Main view ─────────────────────────────────────────────────────────────────
 
-export default function SportsMarketsTab() {
+/** `#SPORT/MARKET` in the URL, so a link can point at either. */
+const fromHash = () => {
+  const [sport = "", market = ""] = location.hash.slice(1).split("/").map(decodeURIComponent);
+  return { sport, market };
+};
+
+export default function SportsMarketsTab({ header }) {
   const [vocab, setVocab] = useState({ sports: {}, markets: {}, bookmakers: {} });
-  const [sports, setSports] = useState([]);
+  const [sports, setSports] = useState(null);
   const [issues, setIssues] = useState(null);
   const [checking, setChecking] = useState(false);
   const [tick, setTick] = useState(0);
+  const [selected, setSelected] = useState(fromHash);
+  const [error, setError] = useState("");
 
   const reload = useCallback(() => setTick((n) => n + 1), []);
 
   useEffect(() => {
     Promise.all([api.getVocab(), api.getSports()]).then(([v, s]) => { setVocab(v); setSports(s); });
   }, [tick]);
+
+  useEffect(() => {
+    const onHash = () => setSelected(fromHash());
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
 
   const check = useCallback(async () => {
     setChecking(true);
@@ -157,7 +166,7 @@ export default function SportsMarketsTab() {
   useEffect(() => { window.payoutRulesEditorCheck = check; }, [check]);
   useEffect(() => { check(); }, [check, tick]);
 
-  const bySport = useMemo(() => Object.fromEntries(sports.map((s) => [s.key, s.markets])), [sports]);
+  const bySport = useMemo(() => Object.fromEntries((sports ?? []).map((s) => [s.key, s.markets])), [sports]);
 
   const missingBySport = useMemo(() => {
     const m = {};
@@ -165,40 +174,76 @@ export default function SportsMarketsTab() {
     return m;
   }, [issues]);
 
+  // Per market of the sport on screen, for the badges on its market tabs.
+  const missingByMarket = (sport) => {
+    const m = {};
+    for (const i of issues ?? []) if (i.sport === sport) m[i.market] = (m[i.market] ?? 0) + 1;
+    return m;
+  };
+
+  // Fall back to the first sport with data when the hash names none.
+  // Tabs are in data/sports.json order, so the fallback is the first tab shown.
+  const shown = Object.keys(vocab.sports).filter((key) => key in bySport);
+  const current = selected.sport in bySport ? selected.sport : shown[0] ?? "";
+  const select = (sport, market = "") => {
+    location.hash = [sport, market].filter(Boolean).map(encodeURIComponent).join("/");
+  };
+
+  const create = async (key) => {
+    try {
+      await api.createSport(key);
+      setError("");
+      select(key);
+      reload();
+    } catch (err) { setError(err.message); }
+  };
+
+  const absent = Object.entries(vocab.sports).filter(([key]) => !(key in bySport));
   const total = issues?.length ?? 0;
 
   return (
-    <div>
-      <div className="d-flex align-items-center gap-2 mb-3">
-        <button className="btn btn-sm btn-outline-secondary" onClick={check} disabled={checking}>
-          {checking ? "Checking…" : "Check All"}
-        </button>
+    <div className="d-flex flex-column flex-grow-1" style={{ minHeight: 0 }}>
+      <div className="d-flex align-items-center flex-wrap gap-2 mb-2">
+        <div className="flex-grow-1">{header}</div>
         {issues !== null && (
           total === 0
             ? <span className="badge bg-success">All compatibility defined</span>
-            : <span className="text-warning small fw-semibold">
-                ⚠ {total} rule pair{total > 1 ? "s" : ""} assigned to bookmakers with nothing written about them
-                <details className="d-inline ms-2" style={{ cursor: "pointer" }}>
-                  <summary className="text-muted d-inline">details</summary>
-                  <ul className="mb-0 mt-1 small fw-normal">
-                    {issues.map((i) => (
-                      <li key={`${i.sport}/${i.slug}`}>{i.sport} / {i.market}: {i.rule_a} × {i.rule_b}</li>
-                    ))}
-                  </ul>
-                </details>
+            : <span className="text-warning small fw-semibold" title={issues.map((i) => `${i.sport} / ${i.market}: ${i.rule_a} × ${i.rule_b}`).join("\n")}>
+                ⚠ {total} undefined pair{total > 1 ? "s" : ""}
               </span>
         )}
+        <button className="btn btn-sm btn-outline-secondary" onClick={check} disabled={checking}>
+          {checking ? "Checking…" : "Check All"}
+        </button>
       </div>
 
-      {Object.entries(vocab.sports).map(([key, label]) => (
-        <SportSection key={key} sportKey={key} sportLabel={label}
-          exists={key in bySport} markets={bySport[key]}
-          vocab={vocab} onChanged={reload}
-          missingCount={missingBySport[key] ?? 0} />
-      ))}
+      <div className="mb-3">
+        <TabBar
+          items={shown.map((key) => ({
+            key,
+            label: vocab.sports[key],
+            badge: missingBySport[key] > 0 && <span className="badge bg-warning text-dark ms-2">⚠ {missingBySport[key]}</span>,
+          }))}
+          active={current} onSelect={(key) => select(key)}
+          extra={absent.length > 0 && (
+            <select className="form-select form-select-sm border-0 text-muted" value=""
+              onChange={(e) => e.target.value && create(e.target.value)}>
+              <option value="">+ sport</option>
+              {absent.map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+            </select>
+          )} />
+      </div>
 
-      {Object.keys(vocab.sports).length === 0 && (
-        <p className="text-muted">No sports in data/sports.json yet.</p>
+      {error && <div className="alert alert-danger py-1 small">{error}</div>}
+
+      {sports !== null && current && (
+        <SportView key={current} sportKey={current} markets={bySport[current]} vocab={vocab} onChanged={reload}
+          market={selected.market} onSelectMarket={(m) => select(current, m)}
+          missingByMarket={missingByMarket(current)} />
+      )}
+
+      {sports !== null && !current && (
+        <p className="text-muted">No sports yet — add one from the “+ sport” menu.</p>
       )}
     </div>
   );

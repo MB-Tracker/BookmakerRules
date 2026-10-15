@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "concurrently \"node server.js\" \"vite\"",
     "build": "vite build",
+    "dev:pages": "vite --mode pages",
+    "build:pages": "vite build --mode pages",
     "preview": "vite preview",
     "server": "node server.js"
   },

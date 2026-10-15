@@ -1,3 +1,13 @@
+import { createCore } from "./core.js";
+import { createMemoryStore } from "./memoryStore.js";
+
+/**
+ * True in the GitHub Pages build (`vite build --mode pages`): there is no
+ * server, so the same core runs in the browser on a snapshot of data/, and the
+ * edits are handed back as a GitHub issue instead of written to disk.
+ */
+export const STATIC = import.meta.env.MODE === "pages";
+
 async function req(method, path, body) {
   const opts = { method, headers: { "Content-Type": "application/json" } };
   if (body !== undefined) opts.body = JSON.stringify(body);
@@ -11,7 +21,7 @@ async function req(method, path, body) {
 
 const enc = encodeURIComponent;
 
-export const api = {
+const httpApi = {
   /** Sports, markets and bookmakers this repo is allowed to name. */
   getVocab: () => req("GET", "/vocab"),
 
@@ -47,3 +57,23 @@ export const api = {
   // Validation
   validate: () => req("GET", "/validate"),
 };
+
+/**
+ * The Pages build's store and snapshot metadata, once the snapshot is loaded.
+ * The snapshot is a separate chunk so the local build never carries it.
+ */
+export const local = STATIC
+  ? import("virtual:data-snapshot").then(({ default: snap }) => ({
+      store: createMemoryStore(snap.files),
+      commit: snap.commit,
+      repo: snap.repo,
+    }))
+  : null;
+
+// The same method names over the in-browser core, each one async like a fetch.
+const core = STATIC ? local.then(({ store }) => createCore(store)) : null;
+const staticApi = STATIC
+  ? new Proxy({}, { get: (_, name) => async (...args) => structuredClone((await core)[name](...args)) })
+  : null;
+
+export const api = STATIC ? staticApi : httpApi;

@@ -11,7 +11,6 @@ import Modal from "./Modal.jsx";
  * one level up, on the sport.
  */
 export default function MarketSection({ sport, market, marketDef, bookmakers, rules, assignments, onChanged }) {
-  const [open, setOpen] = useState(false);
   const [modal, setModal] = useState(null);
   const [formData, setFormData] = useState({});
   const [error, setError] = useState("");
@@ -22,8 +21,6 @@ export default function MarketSection({ sport, market, marketDef, bookmakers, ru
   // The oldest of the variants' dates: the assignment is only as verified as
   // its least recently checked half.
   const lastChecked = (bm) => bm.variants.map((v) => v.last_checked).filter(Boolean).sort()[0] ?? null;
-
-  const stop = (fn) => (e) => { e.stopPropagation(); fn(e); };
 
   // ── Rules ──
 
@@ -115,11 +112,9 @@ export default function MarketSection({ sport, market, marketDef, bookmakers, ru
   };
 
   return (
-    <div className="border-top">
-      <div className="d-flex align-items-center px-3 py-2 bg-white"
-        style={{ cursor: "pointer" }} onClick={() => setOpen((v) => !v)}>
-        <span className="me-2 text-muted" style={{ fontSize: ".75rem", width: "1rem" }}>{open ? "▾" : "▸"}</span>
-        <span className="fw-medium flex-grow-1">
+    <div className="card mb-3">
+      <div className="card-header d-flex align-items-center bg-white">
+        <span className="fw-semibold flex-grow-1">
           {marketDef?.label ?? market}
           <code className="text-muted small ms-2" style={{ fontSize: ".7rem" }}>{market}</code>
         </span>
@@ -127,76 +122,74 @@ export default function MarketSection({ sport, market, marketDef, bookmakers, ru
           {rules.length} rule{rules.length === 1 ? "" : "s"} · {assignments.length} bookmaker{assignments.length === 1 ? "" : "s"}
         </span>
         <button className="btn btn-sm btn-link text-danger p-0 ms-1"
-          onClick={stop(deleteMarket)} title="Delete market">×</button>
+          onClick={deleteMarket} title="Delete market">×</button>
       </div>
 
-      {open && (
-        <div className="px-4 py-3 bg-light">
-          <div className="mb-3">
-            <div className="d-flex align-items-center mb-2">
-              <span className="text-uppercase fw-semibold small text-muted" style={{ letterSpacing: ".05em" }}>Rules</span>
-              <button className="btn btn-sm btn-primary ms-auto" onClick={() => openRuleModal()}>+ Add Rule</button>
-            </div>
-            {rules.length === 0
-              ? <p className="text-muted small mb-0">No rules yet.</p>
-              : <div className="d-flex flex-column gap-1">
-                  {rules.map((r) => (
-                    <div key={r.name} className="d-flex align-items-start bg-white border rounded px-3 py-2">
-                      <div className="flex-grow-1">
-                        <span className="fw-medium">{r.label}</span>
-                        <code className="text-muted small ms-2" style={{ fontSize: ".7rem" }}>{r.name}</code>
-                        {r.description && <div className="text-muted small mt-1">{r.description}</div>}
-                      </div>
-                      <div className="d-flex gap-1 ms-2 flex-shrink-0">
-                        <button className="btn btn-sm btn-outline-secondary" onClick={() => openRuleModal(r)}>Edit</button>
-                        <button className="btn btn-sm btn-outline-danger" onClick={() => deleteRule(r.name)}>×</button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-            }
+      <div className="card-body bg-light">
+        <div className="mb-3">
+          <div className="d-flex align-items-center mb-2">
+            <span className="text-uppercase fw-semibold small text-muted" style={{ letterSpacing: ".05em" }}>Rules</span>
+            <button className="btn btn-sm btn-primary ms-auto" onClick={() => openRuleModal()}>+ Add Rule</button>
           </div>
-
-          <div>
-            <div className="d-flex align-items-center mb-2">
-              <span className="text-uppercase fw-semibold small text-muted" style={{ letterSpacing: ".05em" }}>Bookmakers</span>
-              {unassigned.length > 0 && rules.length > 0 && (
-                <button className="btn btn-sm btn-primary ms-auto" onClick={() => openBmModal()}>+ Assign</button>
-              )}
-            </div>
-            {assignments.length === 0
-              ? <p className="text-muted small mb-0">No bookmakers assigned.</p>
-              : <div className="d-flex flex-column gap-1">
-                  {assignments.map((b) => (
-                    <div key={b.bookmaker} className="d-flex align-items-start bg-white border rounded px-3 py-2">
-                      <div className="flex-grow-1">
-                        <span className="fw-medium">{bookmakers[b.bookmaker]?.display ?? b.bookmaker}</span>
-                        {b.summary && <span className="text-muted small ms-2">{b.summary}</span>}
-                        {b.variants.map((v, i) => (
-                          <div key={i} className="text-muted small">
-                            {v.case && <span className="badge bg-secondary me-2">{v.case}</span>}
-                            → {ruleLabel(v.rule)}
-                          </div>
-                        ))}
-                      </div>
-                      <span className="text-muted small mx-3" title="Last checked">
-                        {lastChecked(b)
-                          ? new Date(lastChecked(b)).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" })
-                          : <em>never checked</em>}
-                      </span>
-                      <div className="d-flex gap-1 flex-shrink-0">
-                        <button className="btn btn-sm btn-outline-success" title="Mark as checked now"
-                          onClick={async () => { await api.touchBookmakerCheck(sport, market, b.bookmaker); onChanged(); }}>✓</button>
-                        <button className="btn btn-sm btn-outline-secondary" onClick={() => openBmModal(b)}>Edit</button>
-                        <button className="btn btn-sm btn-outline-danger" onClick={() => removeBm(b.bookmaker)}>×</button>
-                      </div>
+          {rules.length === 0
+            ? <p className="text-muted small mb-0">No rules yet.</p>
+            : <div className="d-flex flex-column gap-1">
+                {rules.map((r) => (
+                  <div key={r.name} className="d-flex align-items-start bg-white border rounded px-3 py-2">
+                    <div className="flex-grow-1">
+                      <span className="fw-medium">{r.label}</span>
+                      <code className="text-muted small ms-2" style={{ fontSize: ".7rem" }}>{r.name}</code>
+                      {r.description && <div className="text-muted small mt-1">{r.description}</div>}
                     </div>
-                  ))}
-                </div>
-            }
-          </div>
+                    <div className="d-flex gap-1 ms-2 flex-shrink-0">
+                      <button className="btn btn-sm btn-outline-secondary" onClick={() => openRuleModal(r)}>Edit</button>
+                      <button className="btn btn-sm btn-outline-danger" onClick={() => deleteRule(r.name)}>×</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+          }
         </div>
-      )}
+
+        <div>
+          <div className="d-flex align-items-center mb-2">
+            <span className="text-uppercase fw-semibold small text-muted" style={{ letterSpacing: ".05em" }}>Bookmakers</span>
+            {unassigned.length > 0 && rules.length > 0 && (
+              <button className="btn btn-sm btn-primary ms-auto" onClick={() => openBmModal()}>+ Assign</button>
+            )}
+          </div>
+          {assignments.length === 0
+            ? <p className="text-muted small mb-0">No bookmakers assigned.</p>
+            : <div className="d-flex flex-column gap-1">
+                {assignments.map((b) => (
+                  <div key={b.bookmaker} className="d-flex align-items-start bg-white border rounded px-3 py-2">
+                    <div className="flex-grow-1">
+                      <span className="fw-medium">{bookmakers[b.bookmaker]?.display ?? b.bookmaker}</span>
+                      {b.summary && <span className="text-muted small ms-2">{b.summary}</span>}
+                      {b.variants.map((v, i) => (
+                        <div key={i} className="text-muted small">
+                          {v.case && <span className="badge bg-secondary me-2">{v.case}</span>}
+                          → {ruleLabel(v.rule)}
+                        </div>
+                      ))}
+                    </div>
+                    <span className="text-muted small mx-3" title="Last checked">
+                      {lastChecked(b)
+                        ? new Date(lastChecked(b)).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" })
+                        : <em>never checked</em>}
+                    </span>
+                    <div className="d-flex gap-1 flex-shrink-0">
+                      <button className="btn btn-sm btn-outline-success" title="Mark as checked now"
+                        onClick={async () => { await api.touchBookmakerCheck(sport, market, b.bookmaker); onChanged(); }}>✓</button>
+                      <button className="btn btn-sm btn-outline-secondary" onClick={() => openBmModal(b)}>Edit</button>
+                      <button className="btn btn-sm btn-outline-danger" onClick={() => removeBm(b.bookmaker)}>×</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+          }
+        </div>
+      </div>
 
       {modal?.type === "rule" && (
         <Modal title={modal.editing ? "Edit Rule" : `New Rule — ${marketDef?.label ?? market}`}
