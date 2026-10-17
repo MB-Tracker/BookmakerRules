@@ -33,6 +33,17 @@ full contents of every changed file.
 
 To try the static build locally: `cd editor && npm run dev:pages`.
 
+To apply such an issue, copy its body and run:
+
+```bash
+python3 .github/scripts/apply_issue.py              # body from the clipboard
+python3 .github/scripts/apply_issue.py --issue 12   # or fetch it with gh
+```
+
+It writes, replaces and deletes the files the issue lists, stops if any of them
+changed since the commit the issue was made on (`--force` to apply anyway), and
+runs the validator. `--dry-run` shows what it would do.
+
 ## Data Structure
 
 > [!TIP]
