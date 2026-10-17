@@ -77,6 +77,7 @@ export default function ChangesPanel({ onDiscarded }) {
 
       {open && (
         <Modal title="Submit changes as a GitHub issue" size="modal-lg" submitLabel="Open issue on GitHub ↗"
+          actions={<button type="button" className="btn btn-outline-primary" onClick={copy}>Copy changes</button>}
           onClose={() => setOpen(false)} onSubmit={submit}>
           <div className="mb-3">
             <label className="form-label small fw-semibold">Title</label>
@@ -106,12 +107,10 @@ export default function ChangesPanel({ onDiscarded }) {
             <pre className="bg-light border rounded p-2 mt-2 small" style={{ maxHeight: 300, whiteSpace: "pre-wrap" }}>{body}</pre>
           </details>
 
-          <div className="d-flex align-items-center gap-2 mt-3">
-            <button type="button" className="btn btn-sm btn-outline-secondary" onClick={copy}>Copy body</button>
-            {copied && <span className="small text-success">{copied}</span>}
-          </div>
+          {copied && <div className="small text-success mt-3">{copied}</div>}
           <div className="form-text">
-            Opens a prefilled issue on <code>{ctx.repo}</code> — you need a GitHub account to submit it. Your changes stay here until you discard them.
+            Opens a prefilled issue on <code>{ctx.repo}</code>, which needs a GitHub account. Without one, copy the changes
+            and send them to us another way. Your changes stay here until you discard them.
           </div>
         </Modal>
       )}

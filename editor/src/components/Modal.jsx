@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 
-export default function Modal({ title, onClose, onSubmit, submitLabel = "Save", size = "", children, error }) {
+export default function Modal({ title, onClose, onSubmit, submitLabel = "Save", size = "", children, error, actions }) {
   // A plain onClick on the backdrop also fires when a drag *ends* there — select
   // text in a textarea, release past the dialog edge, and the click's target is
   // the backdrop even though the press was inside. Only close when both halves
@@ -32,6 +32,7 @@ export default function Modal({ title, onClose, onSubmit, submitLabel = "Save", 
             </div>
             <div className="modal-footer border-0 pt-0">
               <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
+              {actions}
               <button type="submit" className="btn btn-primary">{submitLabel}</button>
             </div>
           </form>
