@@ -21,7 +21,12 @@ const parentsOf = (p) => {
   return out;
 };
 
-const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+// Key order is not content: a file written by a maintainer may order keys
+// differently from the editor and still be the same change.
+const canonical = (v) => JSON.stringify(v, (_, x) => (x && typeof x === "object" && !Array.isArray(x)
+  ? Object.fromEntries(Object.entries(x).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)))
+  : x));
+const same = (a, b) => canonical(a) === canonical(b);
 
 function load() {
   try {
@@ -58,6 +63,14 @@ export function createMemoryStore(baseline) {
     if (v === null ? !(p in baseline) : same(baseline[p], v)) delete overlay[p];
     else overlay[p] = v;
   };
+
+  // A deploy since the last visit may already carry some of these changes —
+  // usually because they were submitted and applied. Those are no longer
+  // changes, so drop them, and the directories that now have files in them.
+  const before = canonical({ overlay, dirs });
+  for (const [p, v] of Object.entries(overlay)) set(p, v);
+  made = new Set([...made].filter((d) => !Object.keys(baseline).some((f) => f.startsWith(`${d}/`))));
+  if (canonical({ overlay, dirs: [...made] }) !== before) save();
 
   return {
     exists: (p) => p in current() || isDir(p),

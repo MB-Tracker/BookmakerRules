@@ -69,14 +69,14 @@ export default function ChangesPanel({ onDiscarded }) {
     <>
       <div className="position-sticky bottom-0 bg-white border rounded shadow-sm px-3 py-2 mt-3 d-flex align-items-center gap-2">
         {paths.length === 0
-          ? <span className="text-muted small flex-grow-1">No changes yet — edit anything above, then submit it as a GitHub issue.</span>
+          ? <span className="text-muted small flex-grow-1">No changes yet — edit anything above, then submit it.</span>
           : <span className="small fw-semibold flex-grow-1">{paths.length} pending change{paths.length === 1 ? "" : "s"} in this browser</span>}
         <button className="btn btn-sm btn-outline-danger" onClick={discard} disabled={paths.length === 0}>Discard</button>
-        <button className="btn btn-sm btn-success" onClick={openModal} disabled={paths.length === 0}>Create GitHub Issue…</button>
+        <button className="btn btn-sm btn-success" onClick={openModal} disabled={paths.length === 0}>Submit changes…</button>
       </div>
 
       {open && (
-        <Modal title="Submit changes as a GitHub issue" size="modal-lg" submitLabel="Open issue on GitHub ↗"
+        <Modal title="Submit changes" size="modal-lg" submitLabel="Open issue on GitHub ↗"
           actions={<button type="button" className="btn btn-outline-primary" onClick={copy}>Copy changes</button>}
           onClose={() => setOpen(false)} onSubmit={submit}>
           <div className="mb-3">
