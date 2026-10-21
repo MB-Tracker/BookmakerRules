@@ -67,7 +67,7 @@ export default function ChangesPanel({ onDiscarded }) {
 
   return (
     <>
-      <div className="position-sticky bottom-0 bg-white border rounded shadow-sm px-3 py-2 mt-3 d-flex align-items-center gap-2">
+      <div className="position-sticky bottom-0 bg-body border rounded shadow-sm px-3 py-2 mt-3 d-flex align-items-center gap-2">
         {paths.length === 0
           ? <span className="text-muted small flex-grow-1">No changes yet — edit anything above, then submit it.</span>
           : <span className="small fw-semibold flex-grow-1">{paths.length} pending change{paths.length === 1 ? "" : "s"} in this browser</span>}
@@ -104,7 +104,7 @@ export default function ChangesPanel({ onDiscarded }) {
 
           <details>
             <summary className="small text-muted" style={{ cursor: "pointer" }}>Preview issue body</summary>
-            <pre className="bg-light border rounded p-2 mt-2 small" style={{ maxHeight: 300, whiteSpace: "pre-wrap" }}>{body}</pre>
+            <pre className="bg-body-tertiary border rounded p-2 mt-2 small" style={{ maxHeight: 300, whiteSpace: "pre-wrap" }}>{body}</pre>
           </details>
 
           {copied && <div className="small text-success mt-3">{copied}</div>}

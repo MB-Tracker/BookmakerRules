@@ -113,7 +113,7 @@ export default function MarketSection({ sport, market, marketDef, bookmakers, ru
 
   return (
     <div className="card mb-3">
-      <div className="card-header d-flex align-items-center bg-white">
+      <div className="card-header d-flex align-items-center bg-body">
         <span className="fw-semibold flex-grow-1">
           {marketDef?.label ?? market}
           <code className="text-muted small ms-2" style={{ fontSize: ".7rem" }}>{market}</code>
@@ -125,7 +125,7 @@ export default function MarketSection({ sport, market, marketDef, bookmakers, ru
           onClick={deleteMarket} title="Delete market">×</button>
       </div>
 
-      <div className="card-body bg-light">
+      <div className="card-body bg-body-tertiary">
         <div className="mb-3">
           <div className="d-flex align-items-center mb-2">
             <span className="text-uppercase fw-semibold small text-muted" style={{ letterSpacing: ".05em" }}>Rules</span>
@@ -135,7 +135,7 @@ export default function MarketSection({ sport, market, marketDef, bookmakers, ru
             ? <p className="text-muted small mb-0">No rules yet.</p>
             : <div className="d-flex flex-column gap-1">
                 {rules.map((r) => (
-                  <div key={r.name} className="d-flex align-items-start bg-white border rounded px-3 py-2">
+                  <div key={r.name} className="d-flex align-items-start bg-body border rounded px-3 py-2">
                     <div className="flex-grow-1">
                       <span className="fw-medium">{r.label}</span>
                       <code className="text-muted small ms-2" style={{ fontSize: ".7rem" }}>{r.name}</code>
@@ -162,7 +162,7 @@ export default function MarketSection({ sport, market, marketDef, bookmakers, ru
             ? <p className="text-muted small mb-0">No bookmakers assigned.</p>
             : <div className="d-flex flex-column gap-1">
                 {assignments.map((b) => (
-                  <div key={b.bookmaker} className="d-flex align-items-start bg-white border rounded px-3 py-2">
+                  <div key={b.bookmaker} className="d-flex align-items-start bg-body border rounded px-3 py-2">
                     <div className="flex-grow-1">
                       <span className="fw-medium">{bookmakers[b.bookmaker]?.display ?? b.bookmaker}</span>
                       {b.summary && <span className="text-muted small ms-2">{b.summary}</span>}

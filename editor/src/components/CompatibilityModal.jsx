@@ -248,7 +248,7 @@ export default function CompatibilityModal({ sport, entry, prefill, marketsData,
 
       <div className="d-flex flex-column gap-3">
         {form.cases.map((c, i) => (
-          <div key={i} className="border rounded p-3 bg-light">
+          <div key={i} className="border rounded p-3 bg-body-tertiary">
             <div className="d-flex align-items-center gap-2 mb-2">
               <span className="badge bg-secondary">{i + 1}</span>
               <select className="form-select form-select-sm w-auto" value={c.level}

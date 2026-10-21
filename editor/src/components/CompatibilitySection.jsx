@@ -103,9 +103,9 @@ export default function CompatibilitySection({ sport, market, marketsData, entri
                 <span className="opacity-50 mx-2">×</span>
                 {sideText(entry.market_b, entry.rule_b)}
               </span>
-              <span className="badge bg-white text-dark border">{LEVEL_LABEL[entry.level] ?? entry.level}</span>
+              <span className="badge bg-body text-body border">{LEVEL_LABEL[entry.level] ?? entry.level}</span>
               {entry.cases?.length > 0 && (
-                <span className="badge bg-white text-dark border">
+                <span className="badge bg-body text-body border">
                   {entry.cases.length} case{entry.cases.length === 1 ? "" : "s"}
                 </span>
               )}
