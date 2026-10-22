@@ -1,0 +1,19 @@
+{
+    "level": "compatible",
+    "description": "",
+    "cases": [
+        {
+            "when": {
+                "a": {
+                    "outcomes": [
+                        "HOME",
+                        "AWAY"
+                    ],
+                    "side": "BACK"
+                }
+            },
+            "level": "additional_profit",
+            "description": "$A pays the 1X2 bet out as soon as the backed team leads by 3 goals. If the opponent then comes back to a draw or a win, the bet at $A wins as well and both legs are paid."
+        }
+    ]
+}
