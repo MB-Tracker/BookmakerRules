@@ -1,0 +1,16 @@
+{
+    "summary": "Separate early-payout market beside the regular 1X2",
+    "variants": [
+        {
+            "case": "Odds with 2up (2 goals ahead)",
+            "rule": "2up",
+            "early_payout": 2,
+            "last_checked": "2026-11-10T13:45:00.000Z"
+        },
+        {
+            "case": "Odds without early payout",
+            "rule": "regular",
+            "last_checked": "2026-11-10T13:45:00.000Z"
+        }
+    ]
+}

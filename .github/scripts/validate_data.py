@@ -235,6 +235,7 @@ def validate_bookmaker_assignments(bookmakers: dict, require_last_checked: set[s
         market_dir = f.parent.parent
         slugs = rule_slugs(market_dir)
         seen_cases: set[str] = set()
+        seen_leads: set[int] = set()
 
         for i, variant in enumerate(variants):
             where = "" if len(variants) == 1 and raw_variants is None else f"variants[{i}]."
@@ -253,6 +254,21 @@ def validate_bookmaker_assignments(bookmakers: dict, require_last_checked: set[s
             if str(f) in require_last_checked and not last_checked:
                 err(f, "changed bookmaker assignment must have 'last_checked' set (not null) — see CONTRIBUTE.md")
 
+            # The one condition joined onto a live bet: the matcher's
+            # earlyPayoutLead on the leg. A variant naming a lead applies to
+            # legs quoted with exactly that lead; the rest take the variants
+            # that name none.
+            lead = variant.get("early_payout")
+            if lead is not None:
+                if isinstance(lead, bool) or not isinstance(lead, int) or lead <= 0:
+                    err(f, f"'{where}early_payout' must be a positive whole number (the lead, 2 for 2up)")
+                elif raw_variants is None:
+                    err(f, "'early_payout' only goes on an entry of 'variants' — a lone rule applies to every bet")
+                elif lead in seen_leads:
+                    err(f, f"'{where}early_payout' {lead} is on two variants — which applies would be a guess")
+                else:
+                    seen_leads.add(lead)
+
             case = variant.get("case", "")
             if case is not None and not isinstance(case, str):
                 err(f, f"'{where}case' must be a string")
@@ -268,6 +284,9 @@ def validate_bookmaker_assignments(bookmakers: dict, require_last_checked: set[s
                 if case and case.casefold() in seen_cases:
                     err(f, f"'{where}case' repeats an earlier variant's case — cases must be distinguishable")
                 seen_cases.add(case.casefold())
+
+        if seen_leads and all(v.get("early_payout") is not None for v in variants):
+            err(f, "every variant names an early_payout — add one without it for the bets that have none")
 
         rules_used = [v.get("rule") for v in variants if isinstance(v.get("rule"), str)]
         if len(set(rules_used)) != len(rules_used):

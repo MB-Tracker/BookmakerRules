@@ -109,6 +109,26 @@ There are multiple levels to edit:
    Both shapes mean the same thing to every consumer; the flat one is just the
    single-variant case written short.
 
+   **Early payout ("2up") is the exception** where a variant *is* joined onto a live
+   bet. A bookmaker offers it per fixture, and the odds matcher reports per leg
+   whether the quote carries one (`earlyPayoutLead`). A variant with
+   `early_payout: <lead>` applies to exactly the legs quoted with that lead.
+   Every other leg, including one with a lead no variant names, takes the
+   variant without `early_payout`. Because the bet decides which variant applies,
+   the result shows one verdict and no case caption:
+```jsonc
+{
+    "summary": "Early payout on the fixtures the bookmaker marks",
+    "variants": [
+        { "case": "Odds with 2up (2 goals ahead)", "rule": "2up", "early_payout": 2, "last_checked": "<ISO timestamp>" },
+        { "case": "Odds without early payout",     "rule": "regular",                  "last_checked": "<ISO timestamp>" }
+    ]
+}
+```
+   `early_payout` is a positive whole number, the lead (2 for 2up, 20 for a
+   basketball 20up). It goes only on an entry of `variants`, and at most one
+   variant per lead. At least one variant must go without it.
+
 5. **Compatibility** between two rules, in `data/compatibility/<SPORT>/`. Each file
    defines the interaction between two rules — which may sit in *different*
    markets, because backing a 1X2 selection at one bookmaker and a Double Chance

@@ -1,0 +1,32 @@
+{
+    "level": "compatible",
+    "description": "",
+    "cases": [
+        {
+            "when": {
+                "a": {
+                    "outcomes": [
+                        "HOME",
+                        "AWAY"
+                    ],
+                    "side": "BACK"
+                }
+            },
+            "level": "additional_profit",
+            "description": "$A pays the bet out as soon as the backed team leads by 1 goal, no matter the end result. $B does the same at 3 goals."
+        },
+        {
+            "when": {
+                "b": {
+                    "outcomes": [
+                        "HOME",
+                        "AWAY"
+                    ],
+                    "side": "BACK"
+                }
+            },
+            "level": "additional_profit",
+            "description": "$B pays the bet out as soon as the backed team leads by 3 goals, no matter the end result. $A does the same at 1 goal."
+        }
+    ]
+}

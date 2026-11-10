@@ -1,4 +1,16 @@
 {
-    "rule": "17up",
-    "last_checked": "2026-09-09T16:46:35.714Z"
+    "summary": "Early payout on the fixtures the bookmaker marks",
+    "variants": [
+        {
+            "case": "Odds with 17up (17 points ahead)",
+            "rule": "17up",
+            "early_payout": 17,
+            "last_checked": "2026-09-09T16:46:35.714Z"
+        },
+        {
+            "case": "Odds without early payout",
+            "rule": "reg",
+            "last_checked": "2026-11-10T13:45:00.000Z"
+        }
+    ]
 }

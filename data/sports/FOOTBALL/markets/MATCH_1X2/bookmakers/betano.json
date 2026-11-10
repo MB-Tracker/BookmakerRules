@@ -1,4 +1,22 @@
 {
-    "rule": "2up",
-    "last_checked": "2026-09-02T17:48:50.062Z"
+    "summary": "Early payout on the fixtures the bookmaker marks",
+    "variants": [
+        {
+            "case": "Odds with 2up (2 goals ahead)",
+            "rule": "2up",
+            "early_payout": 2,
+            "last_checked": "2026-09-02T17:48:50.062Z"
+        },
+        {
+            "case": "Odds with 3up (3 goals ahead)",
+            "rule": "3up",
+            "early_payout": 3,
+            "last_checked": "2026-11-10T13:45:00.000Z"
+        },
+        {
+            "case": "Odds without early payout",
+            "rule": "regular",
+            "last_checked": "2026-11-10T13:45:00.000Z"
+        }
+    ]
 }
