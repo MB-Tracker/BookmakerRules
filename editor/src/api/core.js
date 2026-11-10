@@ -96,8 +96,14 @@ export function createCore(store) {
   const readBm = (file) => {
     const raw = read(file);
     const variants = Array.isArray(raw.variants)
-      ? raw.variants.map((v) => ({ case: v.case ?? "", rule: v.rule, last_checked: v.last_checked ?? null }))
-      : [{ case: "", rule: raw.rule, last_checked: raw.last_checked ?? null }];
+      ? raw.variants.map((v) => ({
+          case: v.case ?? "",
+          rule: v.rule,
+          // The lead this variant is joined on (the matcher's earlyPayoutLead), or null for "any other bet".
+          early_payout: v.early_payout ?? null,
+          last_checked: v.last_checked ?? null,
+        }))
+      : [{ case: "", rule: raw.rule, early_payout: null, last_checked: raw.last_checked ?? null }];
     return { summary: raw.summary ?? "", variants };
   };
 
@@ -110,7 +116,7 @@ export function createCore(store) {
    * information gained.
    */
   const writeBm = (file, { summary, variants }) => {
-    if (variants.length === 1 && !String(variants[0].case ?? "").trim()) {
+    if (variants.length === 1 && !String(variants[0].case ?? "").trim() && !variants[0].early_payout) {
       write(file, { rule: variants[0].rule, last_checked: variants[0].last_checked });
       return;
     }
@@ -119,6 +125,7 @@ export function createCore(store) {
       variants: variants.map((v) => ({
         case: String(v.case ?? "").trim(),
         rule: v.rule,
+        ...(v.early_payout ? { early_payout: v.early_payout } : {}),
         last_checked: v.last_checked,
       })),
     });
@@ -138,6 +145,7 @@ export function createCore(store) {
 
     const slugs = new Set(jsonNames(rulesDir(sport, market)).map(stem));
     const seen = new Set();
+    const leads = new Set();
     const variants = [];
 
     for (const v of raw) {
@@ -149,9 +157,21 @@ export function createCore(store) {
       const kase = String(v.case ?? "").trim();
       if (raw.length > 1 && !kase) throw bad("every variant needs a case when there is more than one");
       if (kase.length > 80) throw bad("a case must be at most 80 characters — it is drawn in a tooltip");
+      // Empty means "every bet no other variant's lead matches".
+      let lead = null;
+      if (v.early_payout !== undefined && v.early_payout !== null && v.early_payout !== "") {
+        lead = Number(v.early_payout);
+        if (!Number.isInteger(lead) || lead <= 0) throw bad("an early payout lead must be a positive whole number");
+        if (raw.length < 2) throw bad("an early payout lead needs a second variant for the bets without one");
+        if (leads.has(lead)) throw bad(`early payout ${lead} is on two variants`);
+        leads.add(lead);
+      }
       // Touched on every write: a variant that was edited was, by definition,
       // just looked at, and the contribution rules ask for that date.
-      variants.push({ case: kase, rule, last_checked: v.last_checked ?? now });
+      variants.push({ case: kase, rule, early_payout: lead, last_checked: v.last_checked ?? now });
+    }
+    if (leads.size > 0 && variants.every((v) => v.early_payout)) {
+      throw bad("every variant has an early payout lead — leave it empty on one, for the bets without one");
     }
 
     return { summary: String(body.summary ?? "").trim(), variants };

@@ -86,7 +86,7 @@ export default function MarketSection({ sport, market, marketDef, bookmakers, ru
     // it: the assignment was just looked at, which is the whole point of the date.
     const payload = {
       summary: formData.variants.length > 1 ? formData.summary : "",
-      variants: formData.variants.map((v) => ({ case: v.case, rule: v.rule })),
+      variants: formData.variants.map((v) => ({ case: v.case, rule: v.rule, early_payout: v.early_payout || null })),
     };
     try {
       if (modal.editing) {
@@ -169,6 +169,7 @@ export default function MarketSection({ sport, market, marketDef, bookmakers, ru
                       {b.variants.map((v, i) => (
                         <div key={i} className="text-muted small">
                           {v.case && <span className="badge bg-secondary me-2">{v.case}</span>}
+                          {v.early_payout && <span className="badge bg-warning text-dark me-2" title="Applies to odds the matcher reports with this early payout lead">{v.early_payout}up</span>}
                           → {ruleLabel(v.rule)}
                         </div>
                       ))}
@@ -246,6 +247,12 @@ export default function MarketSection({ sport, market, marketDef, bookmakers, ru
                     <input className="form-control" style={{ maxWidth: "14rem" }} value={v.case}
                       onChange={(e) => setVariant(i, { case: e.target.value })}
                       required maxLength={80} placeholder="e.g. ATP · WTA · Grand Slam" />
+                  )}
+                  {formData.variants.length > 1 && (
+                    <input className="form-control" style={{ maxWidth: "6rem" }} type="number" min={1} step={1}
+                      value={v.early_payout ?? ""} placeholder="Xup"
+                      title="Early payout lead (2 for 2up). Set, this variant applies to exactly the odds the matcher reports with that lead; empty, to every other bet."
+                      onChange={(e) => setVariant(i, { early_payout: e.target.value === "" ? null : Number(e.target.value) })} />
                   )}
                   <select className="form-select" value={v.rule}
                     onChange={(e) => setVariant(i, { rule: e.target.value })} required>
