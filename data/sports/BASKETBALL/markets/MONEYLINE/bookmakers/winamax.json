@@ -2,21 +2,15 @@
     "summary": "Early payout on the fixtures the bookmaker marks",
     "variants": [
         {
-            "case": "Odds with 15up (15 points ahead)",
-            "rule": "15up",
-            "early_payout": 15,
-            "last_checked": "2026-11-10T13:45:00.000Z"
-        },
-        {
             "case": "Odds with 20up (20 points ahead)",
             "rule": "20up",
             "early_payout": 20,
-            "last_checked": "2026-10-06T14:34:47.482Z"
+            "last_checked": "2026-11-12T21:36:58.658Z"
         },
         {
             "case": "Odds without early payout",
             "rule": "reg",
-            "last_checked": "2026-11-10T13:45:00.000Z"
+            "last_checked": "2026-11-12T21:36:58.658Z"
         }
     ]
 }
